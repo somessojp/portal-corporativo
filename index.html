@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal Corporativo Somesso</title>
+<style>
+body{font-family:Arial;margin:0;background:#f4f6f8;color:#111}
+.login,.portal{max-width:1100px;margin:40px auto;background:#fff;padding:30px;border-radius:12px}
+h1,h2{margin-top:0}
+input,button{padding:12px;font-size:15px}
+input{width:100%;max-width:420px}
+button{background:#1976d2;color:white;border:0;border-radius:8px;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:25px}
+.card{background:#f9fafb;border:1px solid #ddd;border-radius:12px;padding:20px}
+.card h3{margin-top:0}
+.card a{display:inline-block;margin-top:12px;background:#1976d2;color:white;padding:10px 14px;border-radius:8px;text-decoration:none}
+.topo{display:flex;justify-content:space-between;gap:15px;align-items:center;flex-wrap:wrap}
+small{color:#555}
+.erro{color:#c62828;font-weight:bold}
+.ok{color:#2e7d32;font-weight:bold}
+</style>
+</head>
+<body>
+
+<div id="login" class="login">
+  <h1>Portal Corporativo Somesso</h1>
+  <p>Digite seu e-mail cadastrado na aba <b>Usuarios</b>.</p>
+  <input id="email" type="email" placeholder="seuemail@gmail.com">
+  <button onclick="entrar()">Entrar</button>
+  <p id="msg"></p>
+</div>
+
+<div id="portal" class="portal" style="display:none">
+  <div class="topo">
+    <div>
+      <h2>Portal Corporativo</h2>
+      <small id="usuarioLogado"></small>
+    </div>
+    <button onclick="sair()">Sair</button>
+  </div>
+
+  <div id="sistemas" class="grid"></div>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbyMSNie2VlxV25H-3MpvENoBZO6IdF1QByYSpWOl5yd0vAAKQhyXiMuJaqNo42Kc_nX/exec";
+
+let usuario = null;
+
+async function api(dados){
+  const resp = await fetch(API_URL,{
+    method:"POST",
+    body:JSON.stringify(dados)
+  });
+  return await resp.json();
+}
+
+async function entrar(){
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const msg = document.getElementById("msg");
+
+  if(!email){
+    msg.className = "erro";
+    msg.innerText = "Digite seu e-mail.";
+    return;
+  }
+
+  msg.className = "";
+  msg.innerText = "Verificando acesso...";
+
+  try{
+    const r = await api({acao:"login",email});
+
+    if(!r.ok){
+      msg.className = "erro";
+      msg.innerText = r.erro || "Acesso negado.";
+      return;
+    }
+
+    usuario = r.usuario;
+    localStorage.setItem("portal_usuario",JSON.stringify(usuario));
+
+    abrirPortal();
+
+  }catch(e){
+    msg.className = "erro";
+    msg.innerText = "Erro ao conectar com a API.";
+  }
+}
+
+async function abrirPortal(){
+  document.getElementById("login").style.display = "none";
+  document.getElementById("portal").style.display = "block";
+
+  document.getElementById("usuarioLogado").innerText =
+    usuario.nome + " | " + usuario.email + " | " + usuario.perfil;
+
+  await carregarSistemas();
+}
+
+async function carregarSistemas(){
+  const div = document.getElementById("sistemas");
+  div.innerHTML = "Carregando sistemas...";
+
+  try{
+    const r = await api({acao:"listarSistemas"});
+
+    if(!r.ok){
+      div.innerHTML = "<p class='erro'>Erro ao carregar sistemas.</p>";
+      return;
+    }
+
+    const ativos = r.sistemas.filter(s =>
+      String(s.Ativo || "").toUpperCase().trim() === "SIM"
+    );
+
+    if(!ativos.length){
+      div.innerHTML = "<p>Nenhum sistema ativo cadastrado.</p>";
+      return;
+    }
+
+    div.innerHTML = "";
+
+    ativos.forEach(s=>{
+      div.innerHTML += `
+        <div class="card">
+          <h3>${s.Sistema || ""}</h3>
+          <p>${s["Descrição"] || ""}</p>
+          <a href="${s.URL || "#"}" target="_blank">Acessar Sistema</a>
+        </div>
+      `;
+    });
+
+  }catch(e){
+    div.innerHTML = "<p class='erro'>Erro ao conectar com a API.</p>";
+  }
+}
+
+function sair(){
+  localStorage.removeItem("portal_usuario");
+  location.reload();
+}
+
+window.onload = ()=>{
+  const salvo = localStorage.getItem("portal_usuario");
+  if(salvo){
+    usuario = JSON.parse(salvo);
+    abrirPortal();
+  }
+};
+</script>
+
+</body>
+</html>
