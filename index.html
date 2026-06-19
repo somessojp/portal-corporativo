@@ -232,6 +232,13 @@ function abrirPorNome(nome,btn){
 }
 
 function abrirSistema(s){
+  const nome = String(s.Sistema || '').toLowerCase();
+
+  if(nome.includes('metas')){
+    window.open(s.URL, '_blank');
+    return;
+  }
+
   dashboard.style.display="none";
   viewer.style.display="block";
   tituloPagina.innerText = s.Sistema || "Sistema";
