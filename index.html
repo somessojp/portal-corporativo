@@ -163,6 +163,10 @@ async function entrar(){
 
     usuario = r.usuario;
     localStorage.setItem("portal_usuario",JSON.stringify(usuario));
+    localStorage.setItem("somesso_usuario", JSON.stringify(usuario));
+localStorage.setItem("usuario_propostas", JSON.stringify(usuario));
+localStorage.setItem("usuario_pcmso", JSON.stringify(usuario));
+localStorage.setItem("usuario_gestao", JSON.stringify(usuario));
     abrirPortal();
 
   }catch(e){
@@ -251,6 +255,13 @@ function marcarMenu(btn){
 
 function sair(){
   localStorage.removeItem("portal_usuario");
+  localStorage.removeItem("somesso_usuario");
+  localStorage.removeItem("usuario_propostas");
+  localStorage.removeItem("usuario_propostas_email");
+  localStorage.removeItem("usuario_pcmso");
+  localStorage.removeItem("usuario_pcmso_email");
+  localStorage.removeItem("usuario_gestao");
+  localStorage.removeItem("usuario_gestao_email");
   location.reload();
 }
 
