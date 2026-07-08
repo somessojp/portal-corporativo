@@ -90,7 +90,6 @@ iframe{width:100%;height:78vh;border:1px solid #ddd;border-radius:12px;backgroun
     <div class="menu">
       <button class="ativo" onclick="mostrarDashboard(this)">🏠 Dashboard</button>
       <button onclick="abrirPorNome('Metas e Comissão',this)">📈 Metas e Comissão</button>
-      <button onclick="abrirPorNome('Controle de Propostas',this)">📋 Propostas</button>
       <button onclick="abrirPorNome('PCMSO',this)">🩺 PCMSO</button>
       <button onclick="abrirPorNome('Acompanhamento Empresas Gestão',this)">🏢 Gestão</button>
       <button onclick="abrirPorNome('Relatório Mensal Tamiris',this)">🧩 Relatório Mensal</button>
@@ -167,11 +166,7 @@ async function entrar(){
     }
 
     usuario = r.usuario;
-    localStorage.setItem("portal_usuario",JSON.stringify(usuario));
-    localStorage.setItem("somesso_usuario", JSON.stringify(usuario));
-localStorage.setItem("usuario_propostas", JSON.stringify(usuario));
-localStorage.setItem("usuario_pcmso", JSON.stringify(usuario));
-localStorage.setItem("usuario_gestao", JSON.stringify(usuario));
+    aplicarLoginUnico(usuario, email);
     abrirPortal();
 
   }catch(e){
@@ -192,16 +187,17 @@ async function abrirPortal(){
 
 async function carregarSistemas(){
   const r = await api({acao:"listarSistemas"});
-  sistemas = (r.sistemas || []).filter(s =>
-    String(s.Ativo || "").toUpperCase().trim() === "SIM"
-  );
+  sistemas = (r.sistemas || []).filter(s => {
+    const ativo = String(s.Ativo || "").toUpperCase().trim() === "SIM";
+    const nome = String(s.Sistema || "").toLowerCase().trim();
+    return ativo && !nome.includes("proposta");
+  });
   renderSistemas();
 }
 
 function iconeSistema(nome){
   nome = String(nome).toLowerCase();
   if(nome.includes("meta")) return "📈";
-  if(nome.includes("proposta")) return "📋";
   if(nome.includes("pcmso")) return "🩺";
   if(nome.includes("gest")) return "🏢";
   return "🧩";
@@ -239,8 +235,10 @@ function abrirPorNome(nome,btn){
 function abrirSistema(s){
   const nome = String(s.Sistema || '').toLowerCase();
 
+  const urlComLogin = prepararUrlComLogin(s.URL);
+
   if(nome.includes('metas')){
-    window.open(s.URL, '_blank');
+    window.open(urlComLogin, '_blank');
     return;
   }
 
@@ -248,8 +246,8 @@ function abrirSistema(s){
   viewer.style.display="block";
   tituloPagina.innerText = s.Sistema || "Sistema";
   viewerTitulo.innerText = s.Sistema || "Sistema";
-  frameSistema.src = s.URL;
-  abrirNovaAba.href = s.URL;
+  frameSistema.src = urlComLogin;
+  abrirNovaAba.href = urlComLogin;
 }
 
 function mostrarDashboard(btn){
@@ -265,15 +263,76 @@ function marcarMenu(btn){
   if(btn) btn.classList.add("ativo");
 }
 
+
+function aplicarLoginUnico(dadosUsuario, emailLogin){
+  const email = String(
+    emailLogin ||
+    dadosUsuario?.email ||
+    dadosUsuario?.Email ||
+    dadosUsuario?.["E-mail"] ||
+    ""
+  ).trim().toLowerCase();
+
+  const usuarioNormalizado = {
+    ...dadosUsuario,
+    email: email || dadosUsuario?.email || ""
+  };
+
+  const usuarioJson = JSON.stringify(usuarioNormalizado);
+
+  [
+    "portal_usuario",
+    "somesso_usuario",
+    "usuario_pcmso",
+    "usuario_gestao",
+    "usuario_relatorio",
+    "usuario_metas"
+  ].forEach(chave => localStorage.setItem(chave, usuarioJson));
+
+  [
+    "portal_usuario_email",
+    "somesso_usuario_email",
+    "usuario_pcmso_email",
+    "usuario_gestao_email",
+    "usuario_relatorio_email",
+    "usuario_metas_email"
+  ].forEach(chave => localStorage.setItem(chave, email));
+}
+
+function prepararUrlComLogin(url){
+  const email = usuario?.email || localStorage.getItem("portal_usuario_email") || "";
+  if(!url || !email) return url || "";
+
+  try{
+    const u = new URL(url, window.location.href);
+    u.searchParams.set("portal_email", email);
+    u.searchParams.set("email", email);
+    u.searchParams.set("login_unico", "1");
+    return u.toString();
+  }catch(e){
+    const sep = String(url).includes("?") ? "&" : "?";
+    return `${url}${sep}portal_email=${encodeURIComponent(email)}&email=${encodeURIComponent(email)}&login_unico=1`;
+  }
+}
+
 function sair(){
-  localStorage.removeItem("portal_usuario");
-  localStorage.removeItem("somesso_usuario");
-  localStorage.removeItem("usuario_propostas");
-  localStorage.removeItem("usuario_propostas_email");
-  localStorage.removeItem("usuario_pcmso");
-  localStorage.removeItem("usuario_pcmso_email");
-  localStorage.removeItem("usuario_gestao");
-  localStorage.removeItem("usuario_gestao_email");
+  [
+    "portal_usuario",
+    "portal_usuario_email",
+    "somesso_usuario",
+    "somesso_usuario_email",
+    "usuario_pcmso",
+    "usuario_pcmso_email",
+    "usuario_gestao",
+    "usuario_gestao_email",
+    "usuario_relatorio",
+    "usuario_relatorio_email",
+    "usuario_metas",
+    "usuario_metas_email",
+    "usuario_propostas",
+    "usuario_propostas_email"
+  ].forEach(chave => localStorage.removeItem(chave));
+
   location.reload();
 }
 
@@ -281,6 +340,8 @@ window.onload = () => {
   const salvo = localStorage.getItem("portal_usuario");
   if(salvo){
     usuario = JSON.parse(salvo);
+    const emailSalvo = usuario?.email || localStorage.getItem("portal_usuario_email") || "";
+    aplicarLoginUnico(usuario, emailSalvo);
     abrirPortal();
   }
 };
