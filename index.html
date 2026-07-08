@@ -1,654 +1,290 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Controle de Propostas</title>
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<title>Portal Corporativo Somesso</title>
 <style>
-*{box-sizing:border-box} body{font-family:Arial;margin:0;background:#f4f4f4;color:#000}.sidebar{position:fixed;left:0;top:0;width:220px;height:100vh;background:#35451F;color:#fff;padding:20px;overflow:auto}.sidebar h3{
-  margin-top:15px;
-  color:#fff;
-  letter-spacing:0.5px;
+:root{
+  --verde:#556B2F;
+  --verde2:#6B8E23;
+  --verdeEscuro:#35451F;
+  --fundo:#F5F5F0;
+  --card:#ffffff;
+  --texto:#2b2b2b;
+  --borda:#e0e0d8;
 }
-
-.sidebar button{margin-top:15px}.sidebar button{display:block;width:100%;margin:8px 0;padding:11px;background:#556B2F;color:#fff;border:0;border-radius:6px;cursor:pointer}.main{margin-left:240px;padding:25px}.box{background:#fff;padding:20px;border-radius:10px;margin-bottom:18px;overflow:auto}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}input,select,button{padding:9px;font-size:14px}button{
-  background:#556B2F;
-  color:#fff;
-  border:0;
-  border-radius:6px;
-  cursor:pointer;
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial, sans-serif;background:var(--fundo);color:var(--texto)}
+button,a{cursor:pointer}
+.login{
+  max-width:460px;margin:70px auto;background:#fff;padding:35px;border-radius:18px;
+  box-shadow:0 15px 35px rgba(0,0,0,.12)
 }
-button:hover{
-  background:#6B8E23;
-}table{width:100%;border-collapse:collapse;margin-top:15px}th,td{border:1px solid #ccc;padding:8px;text-align:center;font-size:12px}th{
-  background:#556B2F;
-  color:#fff;
-}.pendente{background:#fff3b0}.sim{background:#b6f0c2}.nao{background:#ffb3b3}.cards{display:flex;gap:15px;flex-wrap:wrap}.card{
-  padding:15px;
-  border-radius:8px;
-  min-width:220px;
-  background:#eef4e4;
-  border-left:5px solid #556B2F;
-}.verde{background:#c8e6c9}.laranja{background:#ffe0b2}a{
-  color:#556B2F;
-  font-weight:bold;
-  text-decoration:none;
-}.acoes button{margin:2px;padding:7px 10px}.topo{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px}@media(max-width:800px){.sidebar{position:relative;width:100%;height:auto}.main{margin-left:0;padding:10px}}
-
-.modal{
-  display:none;
-  position:fixed;
-  z-index:999;
-  left:0;
-  top:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,.45);
-  padding:20px;
+.login h1{text-align:center;color:var(--verdeEscuro);margin-top:0}
+.login input,.login button{width:100%;padding:13px;margin-top:10px;border-radius:9px;font-size:15px}
+.login input{border:1px solid #ccc}
+.login button{background:var(--verde);color:#fff;border:0;font-weight:bold}
+.erro{color:#b00020;font-weight:bold}
+.app{display:none;min-height:100vh}
+.sidebar{
+  position:fixed;left:0;top:0;width:260px;height:100vh;background:var(--verdeEscuro);
+  color:white;padding:24px 18px;overflow:auto
 }
-
-.modal-content{
-  background:#fff;
-  border-radius:12px;
-  padding:20px;
-  max-width:900px;
-  margin:40px auto;
-  box-shadow:0 4px 20px rgba(0,0,0,.18);
+.logo{font-size:22px;font-weight:bold;margin-bottom:5px}
+.sublogo{font-size:12px;opacity:.8;margin-bottom:30px}
+.menu button{
+  display:block;width:100%;margin:8px 0;padding:12px;border:0;border-radius:10px;
+  background:transparent;color:white;text-align:left;font-size:15px
 }
-
-.small{
-  font-size:12px;
-  color:#555;
+.menu button:hover,.menu button.ativo{background:var(--verde2)}
+.main{margin-left:260px;padding:24px}
+.topbar{
+  background:#fff;border-radius:16px;padding:18px 22px;display:flex;justify-content:space-between;
+  align-items:center;gap:12px;box-shadow:0 4px 16px rgba(0,0,0,.06);margin-bottom:20px
 }
-
+.user{font-size:14px;color:#555}
+.sair{background:#8b2d2d;color:#fff;border:0;border-radius:9px;padding:10px 14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.card{
+  background:var(--card);border:1px solid var(--borda);border-radius:18px;padding:22px;
+  box-shadow:0 5px 18px rgba(0,0,0,.06);transition:.2s
+}
+.card:hover{transform:translateY(-3px)}
+.icon{font-size:34px;margin-bottom:8px}
+.card h3{margin:6px 0;color:var(--verdeEscuro)}
+.card p{min-height:42px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{
+  background:var(--verde);color:#fff;border:0;border-radius:9px;padding:10px 13px;text-decoration:none;
+  font-size:14px
+}
+.btn.sec{background:#777}
+.busca{width:100%;padding:13px;border:1px solid #ccc;border-radius:10px;margin-bottom:18px}
+.viewer{display:none;background:#fff;border-radius:16px;padding:12px;box-shadow:0 5px 18px rgba(0,0,0,.06)}
+.viewerTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px}
+iframe{width:100%;height:78vh;border:1px solid #ddd;border-radius:12px;background:#fff}
+.status{display:inline-block;background:#dce8cf;color:#2d4716;padding:5px 9px;border-radius:20px;font-size:12px;font-weight:bold}
+@media(max-width:850px){
+  .sidebar{position:relative;width:100%;height:auto}
+  .main{margin-left:0;padding:12px}
+  .topbar{flex-direction:column;align-items:flex-start}
+}
 </style>
 </head>
 <body>
-<div class="sidebar">
- <h3>Controle V5 Online</h3>
- <button onclick="mostrarTela('dashboard')">Dashboard</button>
- <button onclick="mostrarTela('propostas')">Propostas</button>
- <button onclick="mostrarTela('fechadas')">Propostas Fechadas</button>
- <button onclick="mostrarTela('naoFechadas')">Propostas Não Fechadas</button>
- <button onclick="mostrarTela('empresas')">Empresas</button>
-</div>
-<div class="main">
- <section id="loginBox" class="box">
-  <h2 style="color:#556B2F">Controle de Propostas</h2>
-  <p>Digite o e-mail cadastrado na aba Usuarios.</p>
-  <div class="grid">
-   <input id="emailLogin" type="email" placeholder="Seu e-mail">
-   <button type="button" onclick="fazerLogin()">Entrar</button>
-  </div>
-  <p id="msgLogin"></p>
- </section>
- <div id="appBox" style="display:none">
- <div class="topo">
-  <button onclick="mostrarTela('propostas')">Propostas</button>
-  <button onclick="mostrarTela('fechadas')">Propostas Fechadas</button>
-  <button onclick="mostrarTela('naoFechadas')">Propostas Não Fechadas</button>
-  <button onclick="mostrarTela('empresas')">Empresas</button>
- </div>
 
- <section id="dashboard" class="tela" style="display:none">
-  <div class="box"><h2>Dashboard</h2><div class="cards">
-   <div class="card"><b>Total Enviado</b><br><span id="dashTotal">R$ 0,00</span></div>
-   <div class="card verde"><b>Total Fechado</b><br><span id="dashFechado">R$ 0,00</span></div>
-   <div class="card laranja"><b>Conversão</b><br><span id="dashConv">0%</span></div>
-  </div></div>
- </section>
-
- <section id="propostas" class="tela">
-  <div class="box"><h2>PROPOSTAS</h2>
-   <button type="button" onclick="abrirCadastroEmpresas()">Cadastro de Empresas</button>
-   <br><br>
-   <div class="grid">
-    <select id="statusProposta"><option value="Enviada">Enviada</option><option>Negociação</option><option>Fechada</option><option>Perdida</option></select>
-    <select id="responsavel">
-  <option value="">Selecione o responsável</option>
-  <option value="Tassio Borges">Tassio Borges</option>
-  <option value="Tamilla Pereira">Tamilla Pereira</option>
-</select>
-    <input id="cnpj" placeholder="CNPJ">
-    <input id="empresa" placeholder="Empresa">
-    <input id="contato" placeholder="Contato">
-    <input id="telefone" placeholder="Telefone">
-    <input id="email" placeholder="E-mail">
-    <input id="valor" placeholder="Valor">
-    <input id="descricao" placeholder="Descrição">
-    <input id="data" type="date">
-    <input id="anexo" type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg">
-    <input id="dataFechamento" type="date" title="Data de Fechamento">
-   </div>
-   <br><button id="btnAdicionar" onclick="adicionarProposta()">Adicionar</button>
-  </div>
-  <div class="box"><input id="filtro" placeholder="Pesquisar palavras-chave..." style="width:35%" oninput="render()">
-
-<select id="filtroResponsavel" onchange="render()">
-  <option value="">Todos os responsáveis</option>
-  <option value="Tassio Borges">Tassio Borges</option>
-  <option value="Tamilla Pereira">Tamilla Pereira</option>
-</select>
-
-<button onclick="exportarExcel()">Exportar Excel</button> <input type="month" id="mesPdf"> <button onclick="gerarPDFMensal()">Gerar PDF Mensal</button></div>
-  <div class="box"><h3>Propostas em Aberto</h3><p>Ao clicar em <b>Sim</b>, vai para Propostas Fechadas. Ao clicar em <b>Não</b>, vai para Propostas Não Fechadas.</p><table><thead id="headPrincipal"></thead><tbody id="tb"></tbody></table></div>
-  <div class="box"><div class="cards">
-   <div class="card"><b>Total Geral das Propostas Enviadas</b><br><span id="totalGeral">R$ 0,00</span><hr><b>Quantidade de Propostas Enviadas</b><br><span id="totalEnviadas">0</span></div>
-   <div class="card verde"><b>Total Geral das Propostas Fechadas</b><br><span id="valorFechado">R$ 0,00</span><hr><b>Quantidade de Propostas Fechadas</b><br><span id="totalFechado">0</span></div>
-   <div class="card laranja"><b>Total Geral das Não Fechadas</b><br><span id="valorNaoFechado">R$ 0,00</span><hr><b>Taxa de Conversão</b><br><span id="percentualConversao">0%</span></div>
-  </div></div>
- </section>
-
- <section id="fechadas" class="tela" style="display:none"><div class="box"><h2>Propostas Fechadas</h2><table><thead id="headFechadas"></thead><tbody id="tbFechadas"></tbody></table></div></section>
- <section id="naoFechadas" class="tela" style="display:none"><div class="box"><h2>Propostas Não Fechadas</h2><table><thead id="headNaoFechadas"></thead><tbody id="tbNaoFechadas"></tbody></table></div></section>
- <section id="empresas" class="tela" style="display:none"><div class="box"><h2>Empresas</h2><input id="pesquisaEmpresa" placeholder="Pesquisar empresa"><table><thead><tr><th>CNPJ</th><th>Empresa</th><th>Contato</th><th>Telefone</th><th>E-mail</th><th>Ações</th></tr></thead><tbody id="tbEmpresas"></tbody></table></div></section>
-</div>
-<datalist id="listaEmpresas"></datalist>
+<div id="login" class="login">
+  <h1>Portal Somesso</h1>
+  <p>Digite seu e-mail cadastrado na aba <b>Usuarios</b>.</p>
+  <input id="email" type="email" placeholder="seuemail@gmail.com">
+  <button onclick="entrar()">Entrar</button>
+  <p id="msg"></p>
 </div>
 
-<div id="modalEmpresas" class="modal">
-  <div class="modal-content">
-    <h3>Cadastro de Empresas</h3>
+<div id="app" class="app">
+  <aside class="sidebar">
+    <div class="logo">SOMESSO</div>
+    <div class="sublogo">Portal Corporativo</div>
+    <div class="menu">
+      <button class="ativo" onclick="mostrarDashboard(this)">🏠 Dashboard</button>
+      <button onclick="abrirPorNome('Metas e Comissão',this)">📈 Metas e Comissão</button>
+      <button onclick="abrirPorNome('Controle de Propostas',this)">📋 Propostas</button>
+      <button onclick="abrirPorNome('PCMSO',this)">🩺 PCMSO</button>
+      <button onclick="abrirPorNome('Acompanhamento Empresas Gestão',this)">🏢 Gestão</button>
+      <button onclick="abrirPorNome('Relatório Mensal Tamiris',this)">🧩 Relatório Mensal</button>
+      <button onclick="sair()">🚪 Sair</button>
+    </div>
+  </aside>
 
-    <div class="grid">
-      <input id="empresaCnpj" placeholder="CNPJ">
-      <input id="empresaNome" placeholder="Empresa">
-      <input id="empresaContato" placeholder="Contato">
-      <input id="empresaTelefone" placeholder="Telefone">
-      <input id="empresaEmail" placeholder="E-mail">
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h2 id="tituloPagina">Dashboard</h2>
+        <div class="user" id="usuarioInfo"></div>
+      </div>
+      <button class="sair" onclick="sair()">Sair</button>
     </div>
 
-    <br>
+```
+<section id="dashboard">
+  <input id="busca" class="busca" placeholder="Pesquisar sistema..." oninput="renderSistemas()">
+  <div id="cards" class="cards"></div>
+</section>
 
-    <button type="button" onclick="salvarEmpresa()">Salvar</button>
-    <button type="button" onclick="fecharCadastroEmpresas()" style="background:#777">Fechar</button>
-
-    <p class="small">
-      Após salvar, ao preencher o CNPJ ou selecionar a empresa no formulário principal, os dados serão carregados automaticamente.
-    </p>
+<section id="viewer" class="viewer">
+  <div class="viewerTop">
+    <div>
+      <b id="viewerTitulo">Sistema</b><br>
+      <span class="status">Online</span>
+    </div>
+    <div>
+      <a id="abrirNovaAba" class="btn sec" target="_blank">Abrir em nova aba</a>
+      <button class="btn" onclick="mostrarDashboard()">Voltar</button>
+    </div>
   </div>
+  <iframe id="frameSistema"></iframe>
+</section>
+```
+
+  </main>
 </div>
 
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbxnA_D3tmCOfdo3XMFVUszsOnUl88PSUFi4JYiTX0dnFM0xkFJBJaioMWGA_BZ155SG9g/exec';
-let itens = [];
-let empresas = [];
-let usuarioLogado = null;
-let editandoId = null;
-let editandoFechado = '';
-let editandoStatus = '';
+const API_URL = "https://script.google.com/macros/s/AKfycbyMSNie2VlxV25H-3MpvENoBZO6IdF1QByYSpWOl5yd0vAAKQhyXiMuJaqNo42Kc_nX/exec";
 
-async function api(acao, dados={}){
-  const resp = await fetch(API_URL, {
-    method:'POST',
-    headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body: JSON.stringify({acao, ...dados})
+let usuario = null;
+let sistemas = [];
+
+async function api(dados){
+  const resp = await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(dados)
   });
-  const txt = await resp.text();
-  try { return JSON.parse(txt); }
-  catch(e) {
-    console.error('Resposta inválida da API:', txt);
-    throw new Error('Resposta inválida da API');
-  }
+  return await resp.json();
 }
 
-async function fazerLogin(){
-  const email = emailLogin.value.trim().toLowerCase();
+async function entrar(){
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const msg = document.getElementById("msg");
 
   if(!email){
-    alert('Digite seu e-mail.');
+    msg.className="erro";
+    msg.innerText="Digite seu e-mail.";
     return;
   }
 
-  msgLogin.textContent='Verificando acesso...';
+  msg.innerText="Verificando acesso...";
 
   try{
-
-    const r = await api('login', {email});
-
+    const r = await api({acao:"login",email});
     if(!r.ok){
-      msgLogin.textContent = r.erro || 'Acesso negado';
+      msg.className="erro";
+      msg.innerText=r.erro || "Acesso negado.";
       return;
     }
 
-    usuarioLogado = r.usuario;
-    aplicarPermissoesUsuario();
-
-    // Salva email
-    localStorage.setItem(
-      'usuario_propostas_email',
-      email
-    );
-
-    // Salva usuário completo
-    localStorage.setItem(
-      'usuario_propostas',
-      JSON.stringify(r.usuario)
-    );
-
-    loginBox.style.display='none';
-    appBox.style.display='block';
-
-    await carregarDados();
-
-    mostrarTela('propostas');
+    usuario = r.usuario;
+    localStorage.setItem("portal_usuario",JSON.stringify(usuario));
+    localStorage.setItem("somesso_usuario", JSON.stringify(usuario));
+localStorage.setItem("usuario_propostas", JSON.stringify(usuario));
+localStorage.setItem("usuario_pcmso", JSON.stringify(usuario));
+localStorage.setItem("usuario_gestao", JSON.stringify(usuario));
+    abrirPortal();
 
   }catch(e){
-    msgLogin.textContent =
-      'Erro ao conectar com a API: ' + e.message;
+    msg.className="erro";
+    msg.innerText="Erro ao conectar com a API.";
   }
 }
 
+async function abrirPortal(){
+  login.style.display="none";
+  app.style.display="block";
 
-function getResponsavelUsuario(){
-  if(!usuarioLogado) return '';
-  const vinculo = String(
-    usuarioLogado.consultorVinculado ||
-    usuarioLogado.vendedorVinculado ||
-    usuarioLogado.VendedorVinculado ||
-    usuarioLogado.vendedorvinculado ||
-    ''
-  ).trim();
-  if(vinculo) return vinculo;
-  const nome = String(usuarioLogado.nome || '').trim();
-  if(nome.toLowerCase() === 'tamila' || nome.toLowerCase() === 'tamilla'){
-    return 'Tamilla Pereira';
-  }
-  return nome;
+  usuarioInfo.innerText =
+    `${usuario.nome} | ${usuario.email} | ${usuario.perfil}`;
+
+  await carregarSistemas();
 }
 
-function isAdm(){
-  return String(usuarioLogado?.perfil || '').toUpperCase().trim() === 'ADM';
+async function carregarSistemas(){
+  const r = await api({acao:"listarSistemas"});
+  sistemas = (r.sistemas || []).filter(s =>
+    String(s.Ativo || "").toUpperCase().trim() === "SIM"
+  );
+  renderSistemas();
 }
 
-function aplicarPermissoesUsuario(){
-  if(!usuarioLogado) return;
-
-  const respUsuario = getResponsavelUsuario();
-  const filtroResp = document.getElementById('filtroResponsavel');
-
-  if(!isAdm()){
-    responsavel.innerHTML = `<option value="${respUsuario}">${respUsuario}</option>`;
-    responsavel.value = respUsuario;
-    responsavel.disabled = true;
-
-    if(filtroResp){
-      filtroResp.style.display = 'none';
-      filtroResp.value = '';
-    }
-
-    return;
-  }
-
-  responsavel.innerHTML = `
-    <option value="">Selecione o responsável</option>
-    <option value="Tassio Borges">Tassio Borges</option>
-    <option value="Tamilla Pereira">Tamilla Pereira</option>
-  `;
-
-  responsavel.disabled = false;
-
-  if(filtroResp){
-    filtroResp.innerHTML = `
-      <option value="">Todos os responsáveis</option>
-      <option value="Tassio Borges">Tassio Borges</option>
-      <option value="Tamilla Pereira">Tamilla Pereira</option>
-    `;
-    filtroResp.value = '';
-    filtroResp.style.display = '';
-  }
+function iconeSistema(nome){
+  nome = String(nome).toLowerCase();
+  if(nome.includes("meta")) return "📈";
+  if(nome.includes("proposta")) return "📋";
+  if(nome.includes("pcmso")) return "🩺";
+  if(nome.includes("gest")) return "🏢";
+  return "🧩";
 }
 
-async function carregarDados(){
-  const r = await api('listar');
-  if(!r.ok){ alert('Erro ao carregar dados.'); return; }
-  itens = (r.propostas||[]).map(sheetToProposta);
-  empresas = (r.empresas||[]).map(sheetToEmpresa);
-  aplicarPermissoesUsuario();
-  render();
-}
+function renderSistemas(){
+  const termo = (busca.value || "").toLowerCase();
+  cards.innerHTML = "";
 
-function sheetToProposta(p){
-  return {
-    id:p.ID||'', status:p.Status||'', responsavel:p['Responsável']||'', cnpj:p.CNPJ||'', empresa:p.Empresa||'', contato:p.Contato||'', telefone:p.Telefone||'', email:p['E-mail']||'', valor:p.Valor||0, descricao:p['Descrição']||'', data:normalizarData(p['Data Envio']), anexo:p['Link Anexo']||'', anexoNome:p['Nome Anexo']||'', dataFechamento:normalizarData(p['Data Fechamento']), fechado:p.Fechado||''
-  };
-}
-function limparCNPJ(v){
-  return String(v || '').replace(/\D/g,'');
-}
-
-function sheetToEmpresa(e){
-  return {
-    cnpj: limparCNPJ(e.CNPJ || e.cnpj || ''),
-    nome: e.Empresa || e.empresa || '',
-    contato: e.Contato || e.contato || '',
-    telefone: e.Telefone || e.telefone || '',
-    email: e['E-mail'] || e.Email || e.email || ''
-  };
-}
-
-function normalizarData(v){ if(!v)return ''; if(typeof v==='string' && /^\d{4}-\d{2}-\d{2}/.test(v))return v.slice(0,10); let d=new Date(v); if(!isNaN(d))return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; return String(v); }
-function mostrarTela(id){document.querySelectorAll('.tela').forEach(t=>t.style.display='none');document.getElementById(id).style.display='block';render();}
-function moeda(n){return Number(parseMoeda(n)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});} 
-function parseMoeda(v){ if(typeof v==='number')return v; let s=String(v||'').replace(/[^0-9,.-]/g,''); if(s.includes(',')) s=s.replace(/\./g,'').replace(',','.'); return Number(s)||0; }
-function maskCNPJ(v){return String(v||'').replace(/\D/g,'').replace(/(\d{2})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1/$2').replace(/(\d{4})(\d)/,'$1-$2').slice(0,18)}
-function formatarData(d){if(!d)return '-';let p=String(d).slice(0,10).split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:d}
-function hojeISO(){let d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
-function status(p){return p.fechado==='Sim'?'Sim':(p.fechado==='Não'||p.fechado==='Nao'?'Não':'')}
-function cabecalho(){return '<tr><th>Responsável</th><th>Contato</th><th>Telefone</th><th>E-mail</th><th>CNPJ</th><th>Empresa</th><th>Valor</th><th>Descrição</th><th>Data Envio</th><th>Anexo</th><th>Data Fechamento</th><th>Fechado</th><th>Ação</th></tr>'}
-function linha(p,idx){let v=parseMoeda(p.valor);let st=status(p);let cls=st==='Sim'?'sim':st==='Não'?'nao':'pendente';let an=formatarAnexos(p.anexo,p.anexoNome);return `<tr class="${cls}"><td>${p.responsavel||''}</td><td>${p.contato||''}</td><td>${p.telefone||''}</td><td>${p.email||''}</td><td>${p.cnpj||''}</td><td>${p.empresa||''}</td><td>${moeda(v)}</td><td>${p.descricao||''}</td><td>${formatarData(p.data)}</td><td>${an}</td><td>${formatarData(p.dataFechamento)}</td><td class="acoes"><button onclick="setFechado(${idx},'Sim')">Sim</button><button onclick="setFechado(${idx},'Não')">Não</button></td><td class="acoes"><button onclick="editar(${idx})">Editar</button><button onclick="excluir(${idx})">Excluir</button></td></tr>`}
-function render(){
- ['headPrincipal','headFechadas','headNaoFechadas'].forEach(id=>{let e=document.getElementById(id);if(e)e.innerHTML=cabecalho()});
- let termo=(document.getElementById('filtro')?.value||'').toLowerCase();
- tb.innerHTML=''; tbFechadas.innerHTML=''; tbNaoFechadas.innerHTML='';
- let visiveis = itens;
-if(usuarioLogado && !isAdm()){
-  const meuNome = String(usuarioLogado.nome || '').toLowerCase().trim();
-  const meuVinculo = String(getResponsavelUsuario()).toLowerCase().trim();
-
-  visiveis = itens.filter(p => {
-    const responsavel = String(p.responsavel || '').toLowerCase().trim();
-    return responsavel === meuNome || responsavel === meuVinculo;
-  });
-}
-  if(usuarioLogado && isAdm()){
-  const filtroResp = String(document.getElementById('filtroResponsavel')?.value || '').toLowerCase().trim();
-
-  if(filtroResp){
-    visiveis = visiveis.filter(p =>
-      String(p.responsavel || '').toLowerCase().trim() === filtroResp
-    );
-  }
-}
- let total=0, fechado=0, nao=0, qtdFech=0;
- visiveis.forEach((p)=>{let v=parseMoeda(p.valor); total+=v; let st=status(p); if(st==='Sim'){fechado+=v;qtdFech++} if(st==='Não')nao+=v;});
- visiveis.forEach((p)=>{let idx=itens.findIndex(x=>x.id===p.id); let texto=Object.values(p).join(' ').toLowerCase(); if(termo&&!texto.includes(termo))return; let st=status(p); if(st==='Sim') tbFechadas.innerHTML+=linha(p,idx); else if(st==='Não') tbNaoFechadas.innerHTML+=linha(p,idx); else tb.innerHTML+=linha(p,idx);});
- totalGeral.textContent=moeda(total); valorFechado.textContent=moeda(fechado); valorNaoFechado.textContent=moeda(nao); totalEnviadas.textContent=visiveis.length; totalFechado.textContent=qtdFech; percentualConversao.textContent=visiveis.length?((qtdFech/visiveis.length)*100).toFixed(1)+'%':'0%'; dashTotal.textContent=moeda(total); dashFechado.textContent=moeda(fechado); dashConv.textContent=percentualConversao.textContent; renderEmpresas(); }
-async function setFechado(idx,resposta){ if(!itens[idx])return; itens[idx].fechado=resposta; if(resposta==='Sim'&&!itens[idx].dataFechamento) itens[idx].dataFechamento=hojeISO(); if(resposta==='Não') itens[idx].dataFechamento=''; await salvarPropostaServidor(itens[idx]); await carregarDados(); mostrarTela(resposta==='Sim'?'fechadas':'naoFechadas'); }
-function fileToBase64(file){
-  return new Promise((resolve,reject)=>{
-    if(!file) return resolve('');
-    let r=new FileReader();
-    r.onload=e=>resolve(e.target.result);
-    r.onerror=reject;
-    r.readAsDataURL(file);
-  });
-}
-
-async function arquivosParaBase64(files){
-  const lista=[];
-  for(const file of files){
-    const base64 = await fileToBase64(file);
-    lista.push({nome:file.name, base64:base64});
-  }
-  return lista;
-}
-
-function formatarAnexos(link, nome){
-  if(!link) return '-';
-
-  const links = String(link)
-    .replace(/\r/g, '')
-    .split('\n')
-    .join(';')
-    .split(';')
-    .map(x => x.trim())
-    .filter(Boolean);
-
-  const nomes = String(nome || '')
-    .split(',')
-    .map(x => x.trim())
-    .filter(Boolean);
-
-  return links.map((l,i)=>{
-    const n = nomes[i] || nomes[0] || 'Anexo';
-    return `<a href="${l}" target="_blank">📎 ${n}</a>`;
-  }).join('<br>');
-}
-
-async function adicionarProposta(){
-  const arquivos = anexo.files ? Array.from(anexo.files) : [];
-
-  const responsavelFinal = isAdm()
-    ? responsavel.value.trim()
-    : getResponsavelUsuario();
-
-  if(!responsavelFinal){
-    alert('Usuário consultor sem responsável vinculado. Verifique a aba Usuarios.');
-    return;
-  }
-
-  let obj = {
-    id: editandoId || '',
-    status: editandoId ? (editandoStatus || statusProposta.value) : statusProposta.value,
-    responsavel: responsavelFinal,
-    cnpj: cnpj.value.trim(),
-    empresa: empresa.value.trim(),
-    contato: contato.value.trim(),
-    telefone: telefone.value.trim(),
-    email: email.value.trim(),
-    valor: parseMoeda(valor.value),
-    descricao: descricao.value.trim(),
-    data: data.value,
-    anexo: '',
-    anexoNome: arquivos.length ? arquivos.map(f => f.name).join(', ') : '',
-    dataFechamento: dataFechamento.value,
-    fechado: editandoId ? editandoFechado : ''
-  };
-
-  for (let k of ['responsavel','cnpj','empresa','contato','telefone','email','valor','descricao','data']) {
-    if (!obj[k]) {
-      alert('Campo obrigatório não preenchido: ' + k);
-      return;
-    }
-  }
-
-  btnAdicionar.disabled = true;
-  btnAdicionar.textContent = 'Salvando...';
-
-  try {
-    const anexosBase64 = await arquivosParaBase64(arquivos);
-    const r = await salvarPropostaServidor(obj, anexosBase64);
-
-    if(r && r.ok === false){
-      alert(r.erro || 'Erro ao salvar proposta.');
-      return;
-    }
-
-    editandoId = null;
-    editandoFechado = '';
-    editandoStatus = '';
-    limparProposta();
-    btnAdicionar.textContent = 'Adicionar';
-    await carregarDados();
-
-    alert('Proposta salva com sucesso.');
-  } catch(e) {
-    alert('Erro ao salvar: ' + e.message);
-  } finally {
-    btnAdicionar.disabled = false;
-    btnAdicionar.textContent = 'Adicionar';
-  }
-}
-async function salvarPropostaServidor(p, anexosBase64=[]){
-  return api('salvarProposta', {
-    id:p.id,
-    status:p.status,
-    responsavel:p.responsavel,
-    cnpj:p.cnpj,
-    empresa:p.empresa,
-    contato:p.contato,
-    telefone:p.telefone,
-    email:p.email,
-    valor:p.valor,
-    descricao:p.descricao,
-    dataEnvio:p.data,
-    anexos:anexosBase64,
-    nomeAnexo:p.anexoNome,
-    linkAnexo:p.anexo,
-    dataFechamento:p.dataFechamento,
-    fechado:p.fechado
-  });
-}
-function limparProposta(){
-  ['responsavel','cnpj','empresa','contato','telefone','email','valor','descricao','data','dataFechamento','anexo'].forEach(id=>{
-    let e=document.getElementById(id);
-    if(e)e.value='';
-  });
-
-  if(usuarioLogado && !isAdm()){
-    responsavel.value = getResponsavelUsuario();
-    responsavel.disabled = true;
-  }
-}
-function editar(idx){
-  let p=itens[idx];
-  if(!p)return;
-
-  editandoId=p.id;
-  editandoFechado=p.fechado||'';
-  editandoStatus=p.status||'';
-
-  responsavel.value=p.responsavel||'';
-  cnpj.value=p.cnpj||'';
-  empresa.value=p.empresa||'';
-  contato.value=p.contato||'';
-  telefone.value=p.telefone||'';
-  email.value=p.email||'';
-  valor.value=moeda(parseMoeda(p.valor));
-  descricao.value=p.descricao||'';
-  data.value=p.data||'';
-  dataFechamento.value=p.dataFechamento||'';
-
-  if(usuarioLogado && String(usuarioLogado.perfil || '').toUpperCase() !== 'ADM'){
-    responsavel.disabled = true;
-  }
-
-  btnAdicionar.textContent='Salvar Alteração';
-  mostrarTela('propostas');
-}
-async function excluir(idx){if(confirm('Deseja excluir?')){ await api('excluirProposta',{id:itens[idx].id}); await carregarDados(); }}
-function abrirCadastroEmpresas(){modalEmpresas.style.display='block'}
-function fecharCadastroEmpresas(){modalEmpresas.style.display='none'}
-async function salvarEmpresa(){
-  let c=maskCNPJ(empresaCnpj.value);
-
-  if(!c){
-    alert('Informe o CNPJ');
-    return;
-  }
-
-  let emp={
-    cnpj:c,
-    empresa:empresaNome.value.trim(),
-    contato:empresaContato.value.trim(),
-    telefone:empresaTelefone.value.trim(),
-    email:empresaEmail.value.trim()
-  };
-
-  if(!emp.empresa || !emp.contato || !emp.telefone || !emp.email){
-    alert('Preencha todos os campos da empresa.');
-    return;
-  }
-
-  try{
-    let r = await api('salvarEmpresa',emp);
-
-    if(r && r.ok === false){
-      alert(r.erro || 'Erro ao salvar empresa.');
-      return;
-    }
-
-    fecharCadastroEmpresas();
-
-    ['empresaCnpj','empresaNome','empresaContato','empresaTelefone','empresaEmail']
-      .forEach(id=>document.getElementById(id).value='');
-
-    await carregarDados();
-
-    alert('Empresa cadastrada com sucesso!');
-  }catch(e){
-    alert('Erro ao salvar empresa: '+e.message);
-  }
-}
-function renderEmpresas(){let tb=document.getElementById('tbEmpresas'); if(!tb)return; let termo=(pesquisaEmpresa?.value||'').toLowerCase(); tb.innerHTML=''; listaEmpresas.innerHTML=''; empresas.forEach((e,i)=>{listaEmpresas.innerHTML+=`<option value="${e.nome}">`; let texto=Object.values(e).join(' ').toLowerCase(); if(termo&&!texto.includes(termo))return; tb.innerHTML+=`<tr><td>${e.cnpj||''}</td><td>${e.nome||''}</td><td>${e.contato||''}</td><td>${e.telefone||''}</td><td>${e.email||''}</td><td><button onclick="editarEmpresa(${i})">Editar</button> <button onclick="excluirEmpresa(${i})">Excluir</button></td></tr>`})}
-function editarEmpresa(i){let e=empresas[i]; empresaCnpj.value=e.cnpj;empresaNome.value=e.nome;empresaContato.value=e.contato;empresaTelefone.value=e.telefone;empresaEmail.value=e.email;mostrarTela('propostas')}
-async function excluirEmpresa(i){if(confirm('Deseja excluir empresa?')){await api('excluirEmpresa',{cnpj:empresas[i].cnpj}); await carregarDados();}}
-function preencherEmpresaPorCNPJ(){let c=maskCNPJ(cnpj.value);cnpj.value=c;let e=empresas.find(x=>x.cnpj===c); if(e){empresa.value=e.nome||'';contato.value=e.contato||'';telefone.value=e.telefone||'';email.value=e.email||''}}
-function preencherEmpresaPorNome(){let e=empresas.find(x=>x.nome===empresa.value); if(e){cnpj.value=e.cnpj||'';contato.value=e.contato||'';telefone.value=e.telefone||'';email.value=e.email||''}}
-
-function propostasVisiveis(){
-  let lista = itens;
-
-  if(usuarioLogado && !isAdm()){
-    const meuNome = String(usuarioLogado.nome || '').toLowerCase().trim();
-    const meuVinculo = String(getResponsavelUsuario()).toLowerCase().trim();
-
-    lista = lista.filter(p => {
-      const responsavel = String(p.responsavel || '').toLowerCase().trim();
-      return responsavel === meuNome || responsavel === meuVinculo;
+  sistemas
+    .filter(s => Object.values(s).join(" ").toLowerCase().includes(termo))
+    .forEach(s => {
+      cards.innerHTML += `
+        <div class="card">
+          <div class="icon">${iconeSistema(s.Sistema)}</div>
+          <h3>${s.Sistema || ""}</h3>
+          <p>${s["Descrição"] || ""}</p>
+          <span class="status">Online</span>
+          <br><br>
+          <div class="btns">
+            <button class="btn" onclick='abrirSistema(${JSON.stringify(s)})'>Abrir no Portal</button>
+            <a class="btn sec" href="${s.URL}" target="_blank">Nova aba</a>
+          </div>
+        </div>
+      `;
     });
-  }
-
-  if(usuarioLogado && isAdm()){
-    const filtroResp = String(document.getElementById('filtroResponsavel')?.value || '').toLowerCase().trim();
-
-    if(filtroResp){
-      lista = lista.filter(p =>
-        String(p.responsavel || '').toLowerCase().trim() === filtroResp
-      );
-    }
-  }
-
-  const termo = String(document.getElementById('filtro')?.value || '').toLowerCase().trim();
-
-  if(termo){
-    lista = lista.filter(p => Object.values(p).join(' ').toLowerCase().includes(termo));
-  }
-
-  return lista;
 }
 
-function exportarExcel(){let dados=propostasVisiveis().map(p=>({Responsavel:p.responsavel,Contato:p.contato,Telefone:p.telefone,Email:p.email,CNPJ:p.cnpj,Empresa:p.empresa,Valor:moeda(parseMoeda(p.valor)),Descricao:p.descricao,Data:formatarData(p.data),Anexo:p.anexoNome||'-',DataFechamento:formatarData(p.dataFechamento),Fechado:status(p)||'Aberta'}));let ws=XLSX.utils.json_to_sheet(dados);let wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Propostas');XLSX.writeFile(wb,'propostas.xlsx')}
-function gerarPDFMensal(){let mes=mesPdf.value;if(!mes){alert('Selecione um mês.');return}let filtrados=propostasVisiveis().filter(p=>(p.data||'').startsWith(mes));if(!filtrados.length){alert('Nenhum registro encontrado para este mês.');return}const{jsPDF}=window.jspdf;let doc=new jsPDF({orientation:'landscape'});doc.text('Relatório Mensal de Propostas',14,15);doc.autoTable({startY:25,head:[['Responsável','Contato','Telefone','E-mail','CNPJ','Empresa','Valor','Descrição','Data','Anexo','Data Fechamento','Fechado']],body:filtrados.map(p=>[p.responsavel,p.contato,p.telefone,p.email,p.cnpj,p.empresa,moeda(parseMoeda(p.valor)),p.descricao,formatarData(p.data),p.anexoNome||'-',formatarData(p.dataFechamento),status(p)||'Aberta']),styles:{fontSize:8}});doc.save('relatorio_mensal.pdf')}
-document.addEventListener('input',e=>{if(e.target.id==='empresaCnpj'||e.target.id==='cnpj')e.target.value=maskCNPJ(e.target.value)});
-cnpj.addEventListener('change',preencherEmpresaPorCNPJ); cnpj.addEventListener('blur',preencherEmpresaPorCNPJ); empresa.addEventListener('change',preencherEmpresaPorNome); filtro.addEventListener('keyup',render); pesquisaEmpresa.addEventListener('keyup',renderEmpresas); valor.addEventListener('blur',()=>{valor.value=moeda(parseMoeda(valor.value))});
+function abrirPorNome(nome,btn){
+  const s = sistemas.find(x => String(x.Sistema).trim() === nome);
+  if(s) abrirSistema(s);
+  marcarMenu(btn);
+}
 
-document.addEventListener('click', function(e){
-  if(e.target && e.target.id === 'modalEmpresas'){
-    fecharCadastroEmpresas();
+function abrirSistema(s){
+  const nome = String(s.Sistema || '').toLowerCase();
+
+  if(nome.includes('metas')){
+    window.open(s.URL, '_blank');
+    return;
   }
-});
 
-window.addEventListener('load', async () => {
-  const email = localStorage.getItem('usuario_propostas_email') || localStorage.getItem('usuario_somesso_email') || '';
+  dashboard.style.display="none";
+  viewer.style.display="block";
+  tituloPagina.innerText = s.Sistema || "Sistema";
+  viewerTitulo.innerText = s.Sistema || "Sistema";
+  frameSistema.src = s.URL;
+  abrirNovaAba.href = s.URL;
+}
 
-  if(email){
-    emailLogin.value = email;
-    try{
-      const r = await api('login', {email});
-      if(r.ok){
-        usuarioLogado = r.usuario;
-        localStorage.setItem('usuario_propostas', JSON.stringify(r.usuario));
-        localStorage.setItem('usuario_propostas_email', email);
-        localStorage.setItem('usuario_somesso', JSON.stringify(r.usuario));
-        localStorage.setItem('usuario_somesso_email', email);
+function mostrarDashboard(btn){
+  dashboard.style.display="block";
+  viewer.style.display="none";
+  frameSistema.src = "";
+  tituloPagina.innerText = "Dashboard";
+  marcarMenu(btn);
+}
 
-        loginBox.style.display = 'none';
-        appBox.style.display = 'block';
+function marcarMenu(btn){
+  document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("ativo"));
+  if(btn) btn.classList.add("ativo");
+}
 
-        await carregarDados();
-        mostrarTela('propostas');
-        return;
-      }
-    }catch(e){
-      console.warn('Não foi possível restaurar login automaticamente:', e.message);
-    }
+function sair(){
+  localStorage.removeItem("portal_usuario");
+  localStorage.removeItem("somesso_usuario");
+  localStorage.removeItem("usuario_propostas");
+  localStorage.removeItem("usuario_propostas_email");
+  localStorage.removeItem("usuario_pcmso");
+  localStorage.removeItem("usuario_pcmso_email");
+  localStorage.removeItem("usuario_gestao");
+  localStorage.removeItem("usuario_gestao_email");
+  location.reload();
+}
+
+window.onload = () => {
+  const salvo = localStorage.getItem("portal_usuario");
+  if(salvo){
+    usuario = JSON.parse(salvo);
+    abrirPortal();
   }
-});
+};
 </script>
+
 </body>
 </html>
