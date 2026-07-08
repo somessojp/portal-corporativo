@@ -66,6 +66,15 @@ button,a{cursor:pointer}
 .viewerTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px}
 iframe{width:100%;height:78vh;border:1px solid #ddd;border-radius:12px;background:#fff}
 .status{display:inline-block;background:#dce8cf;color:#2d4716;padding:5px 9px;border-radius:20px;font-size:12px;font-weight:bold}
+
+.empresasBox{display:none;background:#fff;border-radius:16px;padding:20px;box-shadow:0 5px 18px rgba(0,0,0,.06)}
+.empresasGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:12px}
+.empresasGrid input{width:100%;padding:11px;border:1px solid #ccc;border-radius:9px;font-size:14px}
+.tabelaEmpresas{width:100%;border-collapse:collapse;margin-top:15px}
+.tabelaEmpresas th,.tabelaEmpresas td{border:1px solid var(--borda);padding:9px;text-align:left;font-size:13px}
+.tabelaEmpresas th{background:var(--verde);color:#fff}
+.acoesEmpresas button{margin:2px;padding:7px 9px}
+
 @media(max-width:850px){
   .sidebar{position:relative;width:100%;height:auto}
   .main{margin-left:0;padding:12px}
@@ -89,6 +98,7 @@ iframe{width:100%;height:78vh;border:1px solid #ddd;border-radius:12px;backgroun
     <div class="sublogo">Portal Corporativo</div>
     <div class="menu">
       <button class="ativo" onclick="mostrarDashboard(this)">🏠 Dashboard</button>
+      <button onclick="mostrarEmpresas(this)">🏢 Cadastro de Empresas</button>
       <button onclick="abrirPorNome('Metas e Comissão',this)">📈 Metas e Comissão</button>
       <button onclick="abrirPorNome('PCMSO',this)">🩺 PCMSO</button>
       <button onclick="abrirPorNome('Acompanhamento Empresas Gestão',this)">🏢 Gestão</button>
@@ -109,6 +119,31 @@ iframe{width:100%;height:78vh;border:1px solid #ddd;border-radius:12px;backgroun
 <section id="dashboard">
   <input id="busca" class="busca" placeholder="Pesquisar sistema..." oninput="renderSistemas()">
   <div id="cards" class="cards"></div>
+</section>
+
+
+
+<section id="empresasCentral" class="empresasBox">
+  <h2>Cadastro de Empresas</h2>
+  <p class="user">Cadastre a empresa uma única vez. PCMSO e Gestão consultarão esta base pelo CNPJ.</p>
+  <input id="buscaEmpresaCentral" class="busca" placeholder="Pesquisar por CNPJ, empresa, contato, telefone ou e-mail..." oninput="renderEmpresasCentral()">
+  <div class="empresasGrid">
+    <input id="empCnpj" placeholder="CNPJ" onblur="buscarBrasilApiEmpresa()">
+    <input id="empEmpresa" placeholder="Empresa">
+    <input id="empContato" placeholder="Contato">
+    <input id="empTelefone" placeholder="Telefone">
+    <input id="empEmail" placeholder="E-mail">
+  </div>
+  <div class="btns">
+    <button class="btn" onclick="salvarEmpresaCentral()">Salvar empresa</button>
+    <button class="btn sec" onclick="limparEmpresaCentral()">Limpar</button>
+    <button class="btn sec" onclick="carregarEmpresasCentral()">Atualizar</button>
+  </div>
+  <p id="msgEmpresasCentral" class="user"></p>
+  <table class="tabelaEmpresas">
+    <thead><tr><th>CNPJ</th><th>Empresa</th><th>Contato</th><th>Telefone</th><th>E-mail</th><th>Ações</th></tr></thead>
+    <tbody id="tbEmpresasCentral"></tbody>
+  </table>
 </section>
 
 <section id="viewer" class="viewer">
@@ -133,6 +168,8 @@ const API_URL = "https://script.google.com/macros/s/AKfycbyMSNie2VlxV25H-3MpvENo
 
 let usuario = null;
 let sistemas = [];
+let empresasCentral = [];
+let empresaEditandoCnpj = "";
 
 const LOGIN_UNICO_KEYS = [
   "portal_usuario",
@@ -247,6 +284,7 @@ function iconeSistema(nome){
   if(nome.includes("meta")) return "📈";
   if(nome.includes("pcmso")) return "🩺";
   if(nome.includes("gest")) return "🏢";
+  if(nome.includes("empresa")) return "🏢";
   return "🧩";
 }
 
@@ -288,6 +326,7 @@ function abrirSistema(s){
     return;
   }
 
+  empresasCentral.style.display="none";
   dashboard.style.display="none";
   viewer.style.display="block";
   tituloPagina.innerText = s.Sistema || "Sistema";
@@ -298,10 +337,21 @@ function abrirSistema(s){
 
 function mostrarDashboard(btn){
   dashboard.style.display="block";
+  empresasCentral.style.display="none";
   viewer.style.display="none";
   frameSistema.src = "";
   tituloPagina.innerText = "Dashboard";
   marcarMenu(btn);
+}
+
+function mostrarEmpresas(btn){
+  dashboard.style.display="none";
+  viewer.style.display="none";
+  frameSistema.src="";
+  empresasCentral.style.display="block";
+  tituloPagina.innerText="Cadastro de Empresas";
+  marcarMenu(btn);
+  carregarEmpresasCentral();
 }
 
 function marcarMenu(btn){
@@ -314,12 +364,91 @@ function sair(){
   location.reload();
 }
 
+
+
+function limparCNPJ(v){return String(v||"").replace(/\D/g,"")}
+function maskCNPJ(v){return limparCNPJ(v).replace(/(\d{2})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1/$2").replace(/(\d{4})(\d)/,"$1-$2").slice(0,18)}
+function normalizarEmpresaCentral(e){return {cnpj:limparCNPJ(e.CNPJ||e.cnpj||""),empresa:e.Empresa||e.empresa||"",contato:e.Contato||e.contato||"",telefone:e.Telefone||e.telefone||"",email:e.Email||e["E-mail"]||e.email||""}}
+function salvarCacheEmpresasCentral(){localStorage.setItem("portal_empresas",JSON.stringify(empresasCentral));}
+function carregarCacheEmpresasCentral(){try{return JSON.parse(localStorage.getItem("portal_empresas")||"[]")}catch(e){return []}}
+async function apiEmpresasCentral(acao,dados={}){return api({acao,...dados})}
+async function carregarEmpresasCentral(){
+  msgEmpresasCentral.innerText="Carregando empresas...";
+  try{
+    const r = await apiEmpresasCentral("listarEmpresas");
+    const lista = r.empresas || r.Empresas || [];
+    empresasCentral = lista.map(normalizarEmpresaCentral);
+    salvarCacheEmpresasCentral();
+    msgEmpresasCentral.innerText="Empresas atualizadas.";
+  }catch(e){
+    empresasCentral = carregarCacheEmpresasCentral().map(normalizarEmpresaCentral);
+    msgEmpresasCentral.innerText="API de empresas não respondeu. Mostrando cache local. Confirme se o Apps Script do Portal possui as ações listarEmpresas, salvarEmpresa e excluirEmpresa.";
+  }
+  renderEmpresasCentral();
+}
+function renderEmpresasCentral(){
+  const termo = String(buscaEmpresaCentral?.value||"").toLowerCase().trim();
+  tbEmpresasCentral.innerHTML="";
+  empresasCentral.filter(e=>Object.values(e).join(" ").toLowerCase().includes(termo)).forEach(e=>{
+    tbEmpresasCentral.innerHTML += `<tr><td>${maskCNPJ(e.cnpj)}</td><td>${e.empresa||""}</td><td>${e.contato||""}</td><td>${e.telefone||""}</td><td>${e.email||""}</td><td class="acoesEmpresas"><button onclick="editarEmpresaCentral('${e.cnpj}')">Editar</button><button onclick="excluirEmpresaCentral('${e.cnpj}')" style="background:#8b2d2d">Excluir</button></td></tr>`;
+  });
+}
+async function buscarBrasilApiEmpresa(){
+  empCnpj.value = maskCNPJ(empCnpj.value);
+  const c = limparCNPJ(empCnpj.value);
+  if(c.length !== 14) return;
+  const local = empresasCentral.find(e=>e.cnpj===c);
+  if(local){editarEmpresaCentral(c);return;}
+  try{
+    const resp = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${c}`);
+    if(!resp.ok) return;
+    const dados = await resp.json();
+    if(!empEmpresa.value) empEmpresa.value = dados.razao_social || dados.nome_fantasia || "";
+  }catch(e){}
+}
+function editarEmpresaCentral(cnpj){
+  const e = empresasCentral.find(x=>x.cnpj===limparCNPJ(cnpj));
+  if(!e) return;
+  empresaEditandoCnpj = e.cnpj;
+  empCnpj.value = maskCNPJ(e.cnpj); empEmpresa.value=e.empresa||""; empContato.value=e.contato||""; empTelefone.value=e.telefone||""; empEmail.value=e.email||"";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function limparEmpresaCentral(){empresaEditandoCnpj="";["empCnpj","empEmpresa","empContato","empTelefone","empEmail"].forEach(id=>document.getElementById(id).value="");}
+async function salvarEmpresaCentral(){
+  const obj={cnpj:limparCNPJ(empCnpj.value),empresa:empEmpresa.value.trim(),contato:empContato.value.trim(),telefone:empTelefone.value.trim(),email:empEmail.value.trim(),cnpjOriginal:empresaEditandoCnpj};
+  if(obj.cnpj.length!==14){alert("Informe um CNPJ válido.");return;}
+  for(const k of ["empresa","contato","telefone","email"]){if(!obj[k]){alert("Preencha todos os campos da empresa.");return;}}
+  msgEmpresasCentral.innerText="Salvando empresa...";
+  try{
+    const r=await apiEmpresasCentral("salvarEmpresa",obj);
+    if(r && r.ok===false){alert(r.erro||"Erro ao salvar empresa.");return;}
+    const idx=empresasCentral.findIndex(e=>e.cnpj===obj.cnpj || e.cnpj===obj.cnpjOriginal);
+    const normal=normalizarEmpresaCentral(obj);
+    if(idx>=0) empresasCentral[idx]=normal; else empresasCentral.push(normal);
+    salvarCacheEmpresasCentral(); limparEmpresaCentral(); renderEmpresasCentral(); msgEmpresasCentral.innerText="Empresa salva com sucesso.";
+  }catch(e){
+    const idx=empresasCentral.findIndex(x=>x.cnpj===obj.cnpj || x.cnpj===obj.cnpjOriginal);
+    const normal=normalizarEmpresaCentral(obj);
+    if(idx>=0) empresasCentral[idx]=normal; else empresasCentral.push(normal);
+    salvarCacheEmpresasCentral(); limparEmpresaCentral(); renderEmpresasCentral();
+    msgEmpresasCentral.innerText="Empresa salva no cache local. Para ficar disponível em todos os controles, atualize o Apps Script do Portal com salvarEmpresa/listarEmpresas/excluirEmpresa.";
+  }
+}
+async function excluirEmpresaCentral(cnpj){
+  if(!confirm("Deseja excluir esta empresa?")) return;
+  const c=limparCNPJ(cnpj);
+  try{await apiEmpresasCentral("excluirEmpresa",{cnpj:c});}catch(e){}
+  empresasCentral=empresasCentral.filter(e=>e.cnpj!==c); salvarCacheEmpresasCentral(); renderEmpresasCentral();
+}
+document.addEventListener("input",e=>{if(e.target && e.target.id==="empCnpj") e.target.value=maskCNPJ(e.target.value)});
+
 window.onload = () => {
   const salvo = localStorage.getItem("portal_usuario");
   if(salvo){
     usuario = JSON.parse(salvo);
     salvarLoginUnico(usuario, obterEmailUsuario());
     abrirPortal();
+    carregarEmpresasCentral();
   }
 };
 </script>
