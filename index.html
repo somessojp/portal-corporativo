@@ -4,9 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portal Corporativo SOMESSO</title>
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js">
+
+window.fazerLogin = fazerLogin;
+window.sairPortal = sairPortal;
+window.mostrarTela = mostrarTela;
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+
+window.fazerLogin = fazerLogin;
+window.sairPortal = sairPortal;
+window.mostrarTela = mostrarTela;
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js">
+
+window.fazerLogin = fazerLogin;
+window.sairPortal = sairPortal;
+window.mostrarTela = mostrarTela;
+</script>
 <style>
 *{box-sizing:border-box} body{font-family:Arial;margin:0;background:#f4f4f4;color:#000}.sidebar{position:fixed;left:0;top:0;width:220px;height:100vh;background:#35451F;color:#fff;padding:20px;overflow:auto}.sidebar h3{
   margin-top:15px;
@@ -79,7 +94,7 @@ button:hover{
 <div class="main">
  <section id="loginBox" class="box">
   <h2 style="color:#556B2F">Portal Corporativo SOMESSO</h2>
-  <p>Login único do Portal. Entre com o e-mail cadastrado ou acesse pelo Portal Corporativo.</p>
+  <p>Login único do Portal. Entre com o e-mail cadastrado.</p>
   <div class="grid">
    <input id="emailLogin" type="email" placeholder="Seu e-mail">
    <button type="button" onclick="fazerLogin()">Entrar</button>
@@ -92,6 +107,7 @@ button:hover{
   <button onclick="mostrarTela('fechadas')">Propostas Fechadas</button>
   <button onclick="mostrarTela('naoFechadas')">Propostas Não Fechadas</button>
   <button onclick="mostrarTela('empresas')">Empresas</button>
+  <button onclick="sairPortal()" style="background:#777">Sair</button>
  </div>
 
  <section id="dashboard" class="tela" style="display:none">
@@ -182,11 +198,6 @@ let editandoId = null;
 let editandoFechado = '';
 let editandoStatus = '';
 
-const PORTAL_USER_KEY = 'portal_usuario';
-const PORTAL_EMAIL_KEY = 'portal_usuario_email';
-const LEGACY_USER_KEYS = ['usuario_propostas', 'usuario_somesso'];
-const LEGACY_EMAIL_KEYS = ['usuario_propostas_email', 'usuario_somesso_email'];
-
 async function api(acao, dados={}){
   const resp = await fetch(API_URL, {
     method:'POST',
@@ -221,8 +232,17 @@ async function fazerLogin(){
     }
 
     usuarioLogado = r.usuario;
-    salvarSessaoPortal(email, r.usuario);
     aplicarPermissoesUsuario();
+
+    // Salva email
+    localStorage.setItem('portal_usuario_email', email);
+    localStorage.setItem('usuario_propostas_email', email);
+    localStorage.setItem('usuario_somesso_email', email);
+
+    // Salva usuário completo
+    localStorage.setItem('portal_usuario', JSON.stringify(r.usuario));
+    localStorage.setItem('usuario_propostas', JSON.stringify(r.usuario));
+    localStorage.setItem('usuario_somesso', JSON.stringify(r.usuario));
 
     loginBox.style.display='none';
     appBox.style.display='block';
@@ -235,62 +255,38 @@ async function fazerLogin(){
     msgLogin.textContent =
       'Erro ao conectar com a API: ' + e.message;
   }
+
 }
 
-
-function salvarSessaoPortal(email, usuario){
-  const emailLimpo = String(email || usuario?.email || usuario?.Email || '').trim().toLowerCase();
-  const usuarioCompleto = JSON.stringify(usuario || {});
-
-  localStorage.setItem(PORTAL_USER_KEY, usuarioCompleto);
-  localStorage.setItem(PORTAL_EMAIL_KEY, emailLimpo);
-
-  LEGACY_USER_KEYS.forEach(chave => localStorage.setItem(chave, usuarioCompleto));
-  LEGACY_EMAIL_KEYS.forEach(chave => localStorage.setItem(chave, emailLimpo));
+function limparSessaoPortal(){
+  ['portal_usuario','portal_usuario_email','usuario_propostas','usuario_propostas_email','usuario_somesso','usuario_somesso_email'].forEach(k => localStorage.removeItem(k));
 }
 
-function lerUsuarioPortalSalvo(){
-  const bruto = localStorage.getItem(PORTAL_USER_KEY) || localStorage.getItem('usuario_somesso') || localStorage.getItem('usuario_propostas');
-  if(!bruto) return null;
-
-  try{
-    const usuario = JSON.parse(bruto);
-    return usuario && Object.keys(usuario).length ? usuario : null;
-  }catch(e){
-    console.warn('Sessão local inválida:', e.message);
-    return null;
-  }
+function sairPortal(){
+  limparSessaoPortal();
+  usuarioLogado = null;
+  appBox.style.display = 'none';
+  loginBox.style.display = 'block';
+  emailLogin.value = '';
+  msgLogin.textContent = '';
 }
 
-function lerEmailPortalSalvo(){
-  return (
-    localStorage.getItem(PORTAL_EMAIL_KEY) ||
-    localStorage.getItem('usuario_somesso_email') ||
-    localStorage.getItem('usuario_propostas_email') ||
-    ''
-  ).trim().toLowerCase();
-}
-
-async function entrarComUsuarioPortal(usuario){
+async function entrarComUsuarioPortal(usuario, email=''){
   usuarioLogado = usuario;
+  if(email){
+    localStorage.setItem('portal_usuario_email', email);
+    localStorage.setItem('usuario_propostas_email', email);
+    localStorage.setItem('usuario_somesso_email', email);
+  }
+  localStorage.setItem('portal_usuario', JSON.stringify(usuario));
+  localStorage.setItem('usuario_propostas', JSON.stringify(usuario));
+  localStorage.setItem('usuario_somesso', JSON.stringify(usuario));
   aplicarPermissoesUsuario();
   loginBox.style.display = 'none';
   appBox.style.display = 'block';
   await carregarDados();
   mostrarTela('dashboard');
 }
-
-function sairPortal(){
-  [PORTAL_USER_KEY, PORTAL_EMAIL_KEY, ...LEGACY_USER_KEYS, ...LEGACY_EMAIL_KEYS].forEach(chave => localStorage.removeItem(chave));
-  usuarioLogado = null;
-  itens = [];
-  empresas = [];
-  appBox.style.display = 'none';
-  loginBox.style.display = 'block';
-  emailLogin.value = '';
-  msgLogin.textContent = 'Sessão encerrada.';
-}
-
 
 function getResponsavelUsuario(){
   if(!usuarioLogado) return '';
@@ -577,7 +573,7 @@ function editar(idx){
   }
 
   btnAdicionar.textContent='Salvar Alteração';
-  mostrarTela('propostas');
+  mostrarTela('dashboard');
 }
 async function excluir(idx){if(confirm('Deseja excluir?')){ await api('excluirProposta',{id:itens[idx].id}); await carregarDados(); }}
 function abrirCadastroEmpresas(){modalEmpresas.style.display='block'}
@@ -673,22 +669,29 @@ document.addEventListener('click', function(e){
 });
 
 window.addEventListener('load', async () => {
-  const usuarioSalvo = lerUsuarioPortalSalvo();
-  const email = lerEmailPortalSalvo();
-
-  if(usuarioSalvo){
-    if(email) emailLogin.value = email;
-    await entrarComUsuarioPortal(usuarioSalvo);
-    return;
-  }
+  const usuarioSalvoTexto = localStorage.getItem('portal_usuario') || localStorage.getItem('usuario_somesso') || localStorage.getItem('usuario_propostas') || '';
+  const email = localStorage.getItem('portal_usuario_email') || localStorage.getItem('usuario_somesso_email') || localStorage.getItem('usuario_propostas_email') || '';
 
   if(email){
     emailLogin.value = email;
+  }
+
+  if(usuarioSalvoTexto){
+    try{
+      const usuarioSalvo = JSON.parse(usuarioSalvoTexto);
+      await entrarComUsuarioPortal(usuarioSalvo, email);
+      return;
+    }catch(e){
+      limparSessaoPortal();
+      console.warn('Sessão local inválida. Faça login novamente.', e.message);
+    }
+  }
+
+  if(email){
     try{
       const r = await api('login', {email});
       if(r.ok){
-        salvarSessaoPortal(email, r.usuario);
-        await entrarComUsuarioPortal(r.usuario);
+        await entrarComUsuarioPortal(r.usuario, email);
         return;
       }
     }catch(e){
@@ -696,25 +699,11 @@ window.addEventListener('load', async () => {
     }
   }
 });
-      if(r.ok){
-        usuarioLogado = r.usuario;
-        localStorage.setItem('usuario_propostas', JSON.stringify(r.usuario));
-        localStorage.setItem('usuario_propostas_email', email);
-        localStorage.setItem('usuario_somesso', JSON.stringify(r.usuario));
-        localStorage.setItem('usuario_somesso_email', email);
 
-        loginBox.style.display = 'none';
-        appBox.style.display = 'block';
 
-        await carregarDados();
-        mostrarTela('propostas');
-        return;
-      }
-    }catch(e){
-      console.warn('Não foi possível restaurar login automaticamente:', e.message);
-    }
-  }
-});
+window.fazerLogin = fazerLogin;
+window.sairPortal = sairPortal;
+window.mostrarTela = mostrarTela;
 </script>
 </body>
 </html>
