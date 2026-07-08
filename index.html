@@ -1,457 +1,66 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portal Corporativo Somesso</title>
 <style>
-:root{
-  --verde:#556B2F;
-  --verde2:#6B8E23;
-  --verdeEscuro:#35451F;
-  --fundo:#F5F5F0;
-  --card:#ffffff;
-  --texto:#2b2b2b;
-  --borda:#e0e0d8;
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial, sans-serif;background:var(--fundo);color:var(--texto)}
-button,a{cursor:pointer}
-.login{
-  max-width:460px;margin:70px auto;background:#fff;padding:35px;border-radius:18px;
-  box-shadow:0 15px 35px rgba(0,0,0,.12)
-}
-.login h1{text-align:center;color:var(--verdeEscuro);margin-top:0}
-.login input,.login button{width:100%;padding:13px;margin-top:10px;border-radius:9px;font-size:15px}
-.login input{border:1px solid #ccc}
-.login button{background:var(--verde);color:#fff;border:0;font-weight:bold}
-.erro{color:#b00020;font-weight:bold}
-.app{display:none;min-height:100vh}
-.sidebar{
-  position:fixed;left:0;top:0;width:260px;height:100vh;background:var(--verdeEscuro);
-  color:white;padding:24px 18px;overflow:auto
-}
-.logo{font-size:22px;font-weight:bold;margin-bottom:5px}
-.sublogo{font-size:12px;opacity:.8;margin-bottom:30px}
-.menu button{
-  display:block;width:100%;margin:8px 0;padding:12px;border:0;border-radius:10px;
-  background:transparent;color:white;text-align:left;font-size:15px
-}
-.menu button:hover,.menu button.ativo{background:var(--verde2)}
-.main{margin-left:260px;padding:24px}
-.topbar{
-  background:#fff;border-radius:16px;padding:18px 22px;display:flex;justify-content:space-between;
-  align-items:center;gap:12px;box-shadow:0 4px 16px rgba(0,0,0,.06);margin-bottom:20px
-}
-.user{font-size:14px;color:#555}
-.sair{background:#8b2d2d;color:#fff;border:0;border-radius:9px;padding:10px 14px}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
-.card{
-  background:var(--card);border:1px solid var(--borda);border-radius:18px;padding:22px;
-  box-shadow:0 5px 18px rgba(0,0,0,.06);transition:.2s
-}
-.card:hover{transform:translateY(-3px)}
-.icon{font-size:34px;margin-bottom:8px}
-.card h3{margin:6px 0;color:var(--verdeEscuro)}
-.card p{min-height:42px}
-.btns{display:flex;gap:8px;flex-wrap:wrap}
-.btn{
-  background:var(--verde);color:#fff;border:0;border-radius:9px;padding:10px 13px;text-decoration:none;
-  font-size:14px
-}
-.btn.sec{background:#777}
-.busca{width:100%;padding:13px;border:1px solid #ccc;border-radius:10px;margin-bottom:18px}
-.viewer{display:none;background:#fff;border-radius:16px;padding:12px;box-shadow:0 5px 18px rgba(0,0,0,.06)}
-.viewerTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px}
-iframe{width:100%;height:78vh;border:1px solid #ddd;border-radius:12px;background:#fff}
-.status{display:inline-block;background:#dce8cf;color:#2d4716;padding:5px 9px;border-radius:20px;font-size:12px;font-weight:bold}
-
-.empresasBox{display:none;background:#fff;border-radius:16px;padding:20px;box-shadow:0 5px 18px rgba(0,0,0,.06)}
-.empresasGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:12px}
-.empresasGrid input{width:100%;padding:11px;border:1px solid #ccc;border-radius:9px;font-size:14px}
-.tabelaEmpresas{width:100%;border-collapse:collapse;margin-top:15px}
-.tabelaEmpresas th,.tabelaEmpresas td{border:1px solid var(--borda);padding:9px;text-align:left;font-size:13px}
-.tabelaEmpresas th{background:var(--verde);color:#fff}
-.acoesEmpresas button{margin:2px;padding:7px 9px}
-
-@media(max-width:850px){
-  .sidebar{position:relative;width:100%;height:auto}
-  .main{margin-left:0;padding:12px}
-  .topbar{flex-direction:column;align-items:flex-start}
-}
+:root{--verde:#556B2F;--verde2:#6B8E23;--verdeEscuro:#35451F;--fundo:#F5F5F0;--card:#fff;--texto:#2b2b2b;--borda:#e0e0d8}
+*{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:var(--fundo);color:var(--texto)} button,a{cursor:pointer} .login{max-width:460px;margin:70px auto;background:#fff;padding:35px;border-radius:18px;box-shadow:0 15px 35px rgba(0,0,0,.12)} .login h1{text-align:center;color:var(--verdeEscuro);margin-top:0} .login input,.login button{width:100%;padding:13px;margin-top:10px;border-radius:9px;font-size:15px} .login input{border:1px solid #ccc} .login button,.btn{background:var(--verde);color:#fff;border:0;font-weight:bold} .erro{color:#b00020;font-weight:bold} .okmsg{color:#2d4716;font-weight:bold} .app{display:none;min-height:100vh} .sidebar{position:fixed;left:0;top:0;width:260px;height:100vh;background:var(--verdeEscuro);color:white;padding:24px 18px;overflow:auto} .logo{font-size:22px;font-weight:bold;margin-bottom:5px} .sublogo{font-size:12px;opacity:.8;margin-bottom:30px} .menu button{display:block;width:100%;margin:8px 0;padding:12px;border:0;border-radius:10px;background:transparent;color:white;text-align:left;font-size:15px} .menu button:hover,.menu button.ativo{background:var(--verde2)} .main{margin-left:260px;padding:24px} .topbar{background:#fff;border-radius:16px;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px;box-shadow:0 4px 16px rgba(0,0,0,.06);margin-bottom:20px} .user{font-size:14px;color:#555} .sair{background:#8b2d2d;color:#fff;border:0;border-radius:9px;padding:10px 14px} .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px} .card,.box{background:var(--card);border:1px solid var(--borda);border-radius:18px;padding:22px;box-shadow:0 5px 18px rgba(0,0,0,.06)} .card:hover{transform:translateY(-3px)} .icon{font-size:34px;margin-bottom:8px} .card h3{margin:6px 0;color:var(--verdeEscuro)} .card p{min-height:42px} .btns{display:flex;gap:8px;flex-wrap:wrap} .btn{border-radius:9px;padding:10px 13px;text-decoration:none;font-size:14px} .btn.sec{background:#777} .btn.danger{background:#8b2d2d} .busca,input,select{padding:13px;border:1px solid #ccc;border-radius:10px} .busca{width:100%;margin-bottom:18px} .viewer,.tela{display:none} .viewer{background:#fff;border-radius:16px;padding:12px;box-shadow:0 5px 18px rgba(0,0,0,.06)} .viewerTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px} iframe{width:100%;height:78vh;border:1px solid #ddd;border-radius:12px;background:#fff} .status{display:inline-block;background:#dce8cf;color:#2d4716;padding:5px 9px;border-radius:20px;font-size:12px;font-weight:bold} .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px} table{width:100%;border-collapse:collapse;margin-top:15px;background:#fff} th,td{border:1px solid #ddd;padding:9px;text-align:left;font-size:13px} th{background:var(--verde);color:#fff} .actions button{margin:2px;padding:7px 10px} @media(max-width:850px){.sidebar{position:relative;width:100%;height:auto}.main{margin-left:0;padding:12px}.topbar{flex-direction:column;align-items:flex-start}}
 </style>
 </head>
 <body>
-
-<div id="login" class="login">
-  <h1>Portal Somesso</h1>
-  <p>Digite seu e-mail cadastrado na aba <b>Usuarios</b>.</p>
-  <input id="email" type="email" placeholder="seuemail@gmail.com">
-  <button onclick="entrar()">Entrar</button>
-  <p id="msg"></p>
-</div>
-
+<div id="login" class="login"><h1>Portal Somesso</h1><p>Digite seu e-mail cadastrado na aba <b>Usuarios</b>.</p><input id="email" type="email" placeholder="seuemail@gmail.com"><button onclick="entrar()">Entrar</button><p id="msg"></p></div>
 <div id="app" class="app">
-  <aside class="sidebar">
-    <div class="logo">SOMESSO</div>
-    <div class="sublogo">Portal Corporativo</div>
-    <div class="menu">
-      <button class="ativo" onclick="mostrarDashboard(this)">🏠 Dashboard</button>
-      <button onclick="mostrarEmpresas(this)">🏢 Cadastro de Empresas</button>
-      <button onclick="abrirPorNome('Metas e Comissão',this)">📈 Metas e Comissão</button>
-      <button onclick="abrirPorNome('PCMSO',this)">🩺 PCMSO</button>
-      <button onclick="abrirPorNome('Acompanhamento Empresas Gestão',this)">🏢 Gestão</button>
-      <button onclick="abrirPorNome('Relatório Mensal Tamiris',this)">🧩 Relatório Mensal</button>
-      <button onclick="sair()">🚪 Sair</button>
-    </div>
-  </aside>
-
-  <main class="main">
-    <div class="topbar">
-      <div>
-        <h2 id="tituloPagina">Dashboard</h2>
-        <div class="user" id="usuarioInfo"></div>
-      </div>
-      <button class="sair" onclick="sair()">Sair</button>
-    </div>
-
-<section id="dashboard">
-  <input id="busca" class="busca" placeholder="Pesquisar sistema..." oninput="renderSistemas()">
-  <div id="cards" class="cards"></div>
-</section>
-
-
-
-<section id="empresasCentral" class="empresasBox">
-  <h2>Cadastro de Empresas</h2>
-  <p class="user">Cadastre a empresa uma única vez. PCMSO e Gestão consultarão esta base pelo CNPJ.</p>
-  <input id="buscaEmpresaCentral" class="busca" placeholder="Pesquisar por CNPJ, empresa, contato, telefone ou e-mail..." oninput="renderEmpresasCentral()">
-  <div class="empresasGrid">
-    <input id="empCnpj" placeholder="CNPJ" onblur="buscarBrasilApiEmpresa()">
-    <input id="empEmpresa" placeholder="Empresa">
-    <input id="empContato" placeholder="Contato">
-    <input id="empTelefone" placeholder="Telefone">
-    <input id="empEmail" placeholder="E-mail">
-  </div>
-  <div class="btns">
-    <button class="btn" onclick="salvarEmpresaCentral()">Salvar empresa</button>
-    <button class="btn sec" onclick="limparEmpresaCentral()">Limpar</button>
-    <button class="btn sec" onclick="carregarEmpresasCentral()">Atualizar</button>
-  </div>
-  <p id="msgEmpresasCentral" class="user"></p>
-  <table class="tabelaEmpresas">
-    <thead><tr><th>CNPJ</th><th>Empresa</th><th>Contato</th><th>Telefone</th><th>E-mail</th><th>Ações</th></tr></thead>
-    <tbody id="tbEmpresasCentral"></tbody>
-  </table>
-</section>
-
-<section id="viewer" class="viewer">
-  <div class="viewerTop">
-    <div>
-      <b id="viewerTitulo">Sistema</b><br>
-      <span class="status">Online</span>
-    </div>
-    <div>
-      <a id="abrirNovaAba" class="btn sec" target="_blank">Abrir em nova aba</a>
-      <button class="btn" onclick="mostrarDashboard()">Voltar</button>
-    </div>
-  </div>
-  <iframe id="frameSistema"></iframe>
-</section>
-
-  </main>
-</div>
-
+<aside class="sidebar"><div class="logo">SOMESSO</div><div class="sublogo">Portal Corporativo</div><div class="menu">
+<button class="ativo" onclick="mostrarDashboard(this)">🏠 Dashboard</button>
+<button onclick="mostrarEmpresas(this)">🏢 Cadastro de Empresas</button>
+<button onclick="abrirPorNome('Metas e Comissão',this)">📈 Metas e Comissão</button>
+<button onclick="abrirPorNome('PCMSO',this)">🩺 PCMSO</button>
+<button onclick="abrirPorNome('Acompanhamento Empresas Gestão',this)">🏢 Gestão</button>
+<button onclick="abrirPorNome('Relatório Mensal Tamiris',this)">🧩 Relatório Mensal</button>
+<button onclick="sair()">🚪 Sair</button>
+</div></aside>
+<main class="main"><div class="topbar"><div><h2 id="tituloPagina">Dashboard</h2><div class="user" id="usuarioInfo"></div></div><button class="sair" onclick="sair()">Sair</button></div>
+<section id="dashboard"><input id="busca" class="busca" placeholder="Pesquisar sistema..." oninput="renderSistemas()"><div id="cards" class="cards"></div><p id="msgSistemas" class="user"></p></section>
+<section id="empresas" class="tela"><div class="box"><h2>Cadastro de Empresas</h2><p>Base central para PCMSO, Gestão e demais controles.</p><div class="grid"><input id="empCnpj" placeholder="CNPJ"><input id="empEmpresa" placeholder="Empresa"><input id="empContato" placeholder="Contato"><input id="empTelefone" placeholder="Telefone"><input id="empEmail" placeholder="E-mail"></div><br><div class="btns"><button class="btn" onclick="salvarEmpresaPortal()" id="btnSalvarEmpresa">Salvar</button><button class="btn sec" onclick="limparEmpresaForm()">Limpar</button></div><p id="msgEmpresas"></p></div><div class="box"><input id="buscaEmpresa" class="busca" placeholder="Pesquisar empresa, CNPJ, contato..." oninput="renderEmpresas()"><table><thead><tr><th>CNPJ</th><th>Empresa</th><th>Contato</th><th>Telefone</th><th>E-mail</th><th>Ações</th></tr></thead><tbody id="tbEmpresas"></tbody></table></div></section>
+<section id="viewer" class="viewer"><div class="viewerTop"><div><b id="viewerTitulo">Sistema</b><br><span class="status">Online</span></div><div><a id="abrirNovaAba" class="btn sec" target="_blank">Abrir em nova aba</a><button class="btn" onclick="mostrarDashboard()">Voltar</button></div></div><iframe id="frameSistema"></iframe></section>
+</main></div>
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwCWj9Mm8h2zvZeHdp7FkwgJZDA0pfGyhbeboiH_kMMO5GFUQoC8gNBEpfiHy_zxudAzw/exec";
-
 let usuario = null;
 let sistemas = [];
-let empresasCentral = [];
-let empresaEditandoCnpj = "";
-
-const LOGIN_UNICO_KEYS = [
-  "portal_usuario",
-  "somesso_usuario",
-  "usuario_pcmso",
-  "usuario_gestao",
-  "usuario_relatorio",
-  "relatorio_usuario",
-  "usuario_metas",
-  "metas_usuario"
-];
-
-const LOGIN_UNICO_EMAIL_KEYS = [
-  "portal_usuario_email",
-  "somesso_usuario_email",
-  "usuario_pcmso_email",
-  "usuario_gestao_email",
-  "usuario_relatorio_email",
-  "relatorio_usuario_email",
-  "usuario_metas_email",
-  "metas_usuario_email"
-];
-
-function obterEmailUsuario(){
-  return String(usuario?.email || usuario?.Email || usuario?.EMAIL || document.getElementById("email")?.value || "").trim().toLowerCase();
-}
-
-function salvarLoginUnico(usuarioAtual, emailAtual){
-  const emailFinal = String(emailAtual || usuarioAtual?.email || usuarioAtual?.Email || usuarioAtual?.EMAIL || "").trim().toLowerCase();
-  LOGIN_UNICO_KEYS.forEach(k => localStorage.setItem(k, JSON.stringify(usuarioAtual)));
-  LOGIN_UNICO_EMAIL_KEYS.forEach(k => localStorage.setItem(k, emailFinal));
-}
-
-function montarUrlLoginUnico(url){
-  const emailFinal = obterEmailUsuario();
-  if(!url || !emailFinal) return url;
-
-  try{
-    const u = new URL(url, window.location.href);
-    u.searchParams.set("email", emailFinal);
-    u.searchParams.set("usuario", emailFinal);
-    u.searchParams.set("portal_login", "1");
-    u.searchParams.set("sso", "1");
-    return u.toString();
-  }catch(e){
-    const separador = String(url).includes("?") ? "&" : "?";
-    return `${url}${separador}email=${encodeURIComponent(emailFinal)}&usuario=${encodeURIComponent(emailFinal)}&portal_login=1&sso=1`;
-  }
-}
-
-async function api(dados){
-  const resp = await fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"text/plain;charset=utf-8"},
-    body:JSON.stringify(dados)
-  });
-  return await resp.json();
-}
-
-async function entrar(){
-  const email = document.getElementById("email").value.trim().toLowerCase();
-  const msg = document.getElementById("msg");
-
-  if(!email){
-    msg.className="erro";
-    msg.innerText="Digite seu e-mail.";
-    return;
-  }
-
-  msg.innerText="Verificando acesso...";
-
-  try{
-    const r = await api({acao:"login",email});
-    if(!r.ok){
-      msg.className="erro";
-      msg.innerText=r.erro || "Acesso negado.";
-      return;
-    }
-
-    usuario = r.usuario;
-    salvarLoginUnico(usuario, email);
-    abrirPortal();
-
-  }catch(e){
-    msg.className="erro";
-    msg.innerText="Erro ao conectar com a API.";
-  }
-}
-
-async function abrirPortal(){
-  login.style.display="none";
-  app.style.display="block";
-
-  usuarioInfo.innerText =
-    `${usuario.nome} | ${usuario.email} | ${usuario.perfil}`;
-
-  await carregarSistemas();
-}
-
-async function carregarSistemas(){
-  const r = await api({acao:"listarSistemas"});
-  sistemas = (r.sistemas || []).filter(s => {
-    const ativo = String(s.Ativo || "").toUpperCase().trim() === "SIM";
-    const nome = String(s.Sistema || "").toLowerCase();
-    return ativo && !nome.includes("proposta");
-  });
-  renderSistemas();
-}
-
-function iconeSistema(nome){
-  nome = String(nome).toLowerCase();
-  if(nome.includes("meta")) return "📈";
-  if(nome.includes("pcmso")) return "🩺";
-  if(nome.includes("gest")) return "🏢";
-  if(nome.includes("empresa")) return "🏢";
-  return "🧩";
-}
-
-function renderSistemas(){
-  const termo = (busca.value || "").toLowerCase();
-  cards.innerHTML = "";
-
-  sistemas
-    .filter(s => Object.values(s).join(" ").toLowerCase().includes(termo))
-    .forEach(s => {
-      cards.innerHTML += `
-        <div class="card">
-          <div class="icon">${iconeSistema(s.Sistema)}</div>
-          <h3>${s.Sistema || ""}</h3>
-          <p>${s["Descrição"] || ""}</p>
-          <span class="status">Online</span>
-          <br><br>
-          <div class="btns">
-            <button class="btn" onclick='abrirSistema(${JSON.stringify(s)})'>Abrir no Portal</button>
-            <a class="btn sec" href="${montarUrlLoginUnico(s.URL)}" target="_blank">Nova aba</a>
-          </div>
-        </div>
-      `;
-    });
-}
-
-function abrirPorNome(nome,btn){
-  const s = sistemas.find(x => String(x.Sistema).trim() === nome);
-  if(s) abrirSistema(s);
-  marcarMenu(btn);
-}
-
-function abrirSistema(s){
-  const nome = String(s.Sistema || '').toLowerCase();
-  const urlLoginUnico = montarUrlLoginUnico(s.URL);
-
-  if(nome.includes('metas')){
-    window.open(urlLoginUnico, '_blank');
-    return;
-  }
-
-  empresasCentral.style.display="none";
-  dashboard.style.display="none";
-  viewer.style.display="block";
-  tituloPagina.innerText = s.Sistema || "Sistema";
-  viewerTitulo.innerText = s.Sistema || "Sistema";
-  frameSistema.src = urlLoginUnico;
-  abrirNovaAba.href = urlLoginUnico;
-}
-
-function mostrarDashboard(btn){
-  dashboard.style.display="block";
-  empresasCentral.style.display="none";
-  viewer.style.display="none";
-  frameSistema.src = "";
-  tituloPagina.innerText = "Dashboard";
-  marcarMenu(btn);
-}
-
-function mostrarEmpresas(btn){
-  dashboard.style.display="none";
-  viewer.style.display="none";
-  frameSistema.src="";
-  empresasCentral.style.display="block";
-  tituloPagina.innerText="Cadastro de Empresas";
-  marcarMenu(btn);
-  carregarEmpresasCentral();
-}
-
-function marcarMenu(btn){
-  document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("ativo"));
-  if(btn) btn.classList.add("ativo");
-}
-
-function sair(){
-  [...LOGIN_UNICO_KEYS, ...LOGIN_UNICO_EMAIL_KEYS, "usuario_propostas", "usuario_propostas_email"].forEach(k => localStorage.removeItem(k));
-  location.reload();
-}
-
-
-
-function limparCNPJ(v){return String(v||"").replace(/\D/g,"")}
-function maskCNPJ(v){return limparCNPJ(v).replace(/(\d{2})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1/$2").replace(/(\d{4})(\d)/,"$1-$2").slice(0,18)}
-function normalizarEmpresaCentral(e){return {cnpj:limparCNPJ(e.CNPJ||e.cnpj||""),empresa:e.Empresa||e.empresa||"",contato:e.Contato||e.contato||"",telefone:e.Telefone||e.telefone||"",email:e.Email||e["E-mail"]||e.email||""}}
-function salvarCacheEmpresasCentral(){localStorage.setItem("portal_empresas",JSON.stringify(empresasCentral));}
-function carregarCacheEmpresasCentral(){try{return JSON.parse(localStorage.getItem("portal_empresas")||"[]")}catch(e){return []}}
-async function apiEmpresasCentral(acao,dados={}){return api({acao,...dados})}
-async function carregarEmpresasCentral(){
-  msgEmpresasCentral.innerText="Carregando empresas...";
-  try{
-    const r = await apiEmpresasCentral("listarEmpresas");
-    const lista = r.empresas || r.Empresas || [];
-    empresasCentral = lista.map(normalizarEmpresaCentral);
-    salvarCacheEmpresasCentral();
-    msgEmpresasCentral.innerText="Empresas atualizadas.";
-  }catch(e){
-    empresasCentral = carregarCacheEmpresasCentral().map(normalizarEmpresaCentral);
-    msgEmpresasCentral.innerText="API de empresas não respondeu. Mostrando cache local. Confirme se o Apps Script do Portal possui as ações listarEmpresas, salvarEmpresa e excluirEmpresa.";
-  }
-  renderEmpresasCentral();
-}
-function renderEmpresasCentral(){
-  const termo = String(buscaEmpresaCentral?.value||"").toLowerCase().trim();
-  tbEmpresasCentral.innerHTML="";
-  empresasCentral.filter(e=>Object.values(e).join(" ").toLowerCase().includes(termo)).forEach(e=>{
-    tbEmpresasCentral.innerHTML += `<tr><td>${maskCNPJ(e.cnpj)}</td><td>${e.empresa||""}</td><td>${e.contato||""}</td><td>${e.telefone||""}</td><td>${e.email||""}</td><td class="acoesEmpresas"><button onclick="editarEmpresaCentral('${e.cnpj}')">Editar</button><button onclick="excluirEmpresaCentral('${e.cnpj}')" style="background:#8b2d2d">Excluir</button></td></tr>`;
-  });
-}
-async function buscarBrasilApiEmpresa(){
-  empCnpj.value = maskCNPJ(empCnpj.value);
-  const c = limparCNPJ(empCnpj.value);
-  if(c.length !== 14) return;
-  const local = empresasCentral.find(e=>e.cnpj===c);
-  if(local){editarEmpresaCentral(c);return;}
-  try{
-    const resp = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${c}`);
-    if(!resp.ok) return;
-    const dados = await resp.json();
-    if(!empEmpresa.value) empEmpresa.value = dados.razao_social || dados.nome_fantasia || "";
-  }catch(e){}
-}
-function editarEmpresaCentral(cnpj){
-  const e = empresasCentral.find(x=>x.cnpj===limparCNPJ(cnpj));
-  if(!e) return;
-  empresaEditandoCnpj = e.cnpj;
-  empCnpj.value = maskCNPJ(e.cnpj); empEmpresa.value=e.empresa||""; empContato.value=e.contato||""; empTelefone.value=e.telefone||""; empEmail.value=e.email||"";
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-function limparEmpresaCentral(){empresaEditandoCnpj="";["empCnpj","empEmpresa","empContato","empTelefone","empEmail"].forEach(id=>document.getElementById(id).value="");}
-async function salvarEmpresaCentral(){
-  const obj={cnpj:limparCNPJ(empCnpj.value),empresa:empEmpresa.value.trim(),contato:empContato.value.trim(),telefone:empTelefone.value.trim(),email:empEmail.value.trim(),cnpjOriginal:empresaEditandoCnpj};
-  if(obj.cnpj.length!==14){alert("Informe um CNPJ válido.");return;}
-  for(const k of ["empresa","contato","telefone","email"]){if(!obj[k]){alert("Preencha todos os campos da empresa.");return;}}
-  msgEmpresasCentral.innerText="Salvando empresa...";
-  try{
-    const r=await apiEmpresasCentral("salvarEmpresa",obj);
-    if(r && r.ok===false){alert(r.erro||"Erro ao salvar empresa.");return;}
-    const idx=empresasCentral.findIndex(e=>e.cnpj===obj.cnpj || e.cnpj===obj.cnpjOriginal);
-    const normal=normalizarEmpresaCentral(obj);
-    if(idx>=0) empresasCentral[idx]=normal; else empresasCentral.push(normal);
-    salvarCacheEmpresasCentral(); limparEmpresaCentral(); renderEmpresasCentral(); msgEmpresasCentral.innerText="Empresa salva com sucesso.";
-  }catch(e){
-    const idx=empresasCentral.findIndex(x=>x.cnpj===obj.cnpj || x.cnpj===obj.cnpjOriginal);
-    const normal=normalizarEmpresaCentral(obj);
-    if(idx>=0) empresasCentral[idx]=normal; else empresasCentral.push(normal);
-    salvarCacheEmpresasCentral(); limparEmpresaCentral(); renderEmpresasCentral();
-    msgEmpresasCentral.innerText="Empresa salva no cache local. Para ficar disponível em todos os controles, atualize o Apps Script do Portal com salvarEmpresa/listarEmpresas/excluirEmpresa.";
-  }
-}
-async function excluirEmpresaCentral(cnpj){
-  if(!confirm("Deseja excluir esta empresa?")) return;
-  const c=limparCNPJ(cnpj);
-  try{await apiEmpresasCentral("excluirEmpresa",{cnpj:c});}catch(e){}
-  empresasCentral=empresasCentral.filter(e=>e.cnpj!==c); salvarCacheEmpresasCentral(); renderEmpresasCentral();
-}
-document.addEventListener("input",e=>{if(e.target && e.target.id==="empCnpj") e.target.value=maskCNPJ(e.target.value)});
-
-window.onload = () => {
-  const salvo = localStorage.getItem("portal_usuario");
-  if(salvo){
-    usuario = JSON.parse(salvo);
-    salvarLoginUnico(usuario, obterEmailUsuario());
-    abrirPortal();
-    carregarEmpresasCentral();
-  }
-};
+let empresas = [];
+let editandoCnpj = "";
+const LOGIN_UNICO_KEYS = ["portal_usuario","somesso_usuario","usuario_pcmso","usuario_gestao","usuario_relatorio","relatorio_usuario","usuario_metas","metas_usuario"];
+const LOGIN_UNICO_EMAIL_KEYS = ["portal_usuario_email","somesso_usuario_email","usuario_pcmso_email","usuario_gestao_email","usuario_relatorio_email","relatorio_usuario_email","usuario_metas_email","metas_usuario_email"];
+function esc(v){return String(v??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+function limparCNPJ(v){return String(v||'').replace(/\D/g,'')}
+function maskCNPJ(v){return limparCNPJ(v).replace(/(\d{2})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1/$2').replace(/(\d{4})(\d)/,'$1-$2').slice(0,18)}
+function obterEmailUsuario(){return String(usuario?.email||usuario?.Email||usuario?.EMAIL||document.getElementById('email')?.value||'').trim().toLowerCase()}
+function salvarLoginUnico(usuarioAtual,emailAtual){const emailFinal=String(emailAtual||usuarioAtual?.email||usuarioAtual?.Email||usuarioAtual?.EMAIL||'').trim().toLowerCase();LOGIN_UNICO_KEYS.forEach(k=>localStorage.setItem(k,JSON.stringify(usuarioAtual)));LOGIN_UNICO_EMAIL_KEYS.forEach(k=>localStorage.setItem(k,emailFinal));}
+function montarUrlLoginUnico(url){const emailFinal=obterEmailUsuario(); if(!url||!emailFinal)return url; try{const u=new URL(url,window.location.href);u.searchParams.set('email',emailFinal);u.searchParams.set('usuario',emailFinal);u.searchParams.set('portal_login','1');u.searchParams.set('sso','1');return u.toString();}catch(e){const sep=String(url).includes('?')?'&':'?';return `${url}${sep}email=${encodeURIComponent(emailFinal)}&usuario=${encodeURIComponent(emailFinal)}&portal_login=1&sso=1`;}}
+async function api(dados){const resp=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(dados)});const txt=await resp.text();try{return JSON.parse(txt)}catch(e){console.error(txt);throw new Error('Resposta inválida da API do Portal')}}
+async function entrar(){const email=document.getElementById('email').value.trim().toLowerCase(); if(!email){msg.className='erro';msg.innerText='Digite seu e-mail.';return} msg.className='';msg.innerText='Verificando acesso...'; try{const r=await api({acao:'login',email}); if(!r.ok){msg.className='erro';msg.innerText=r.erro||'Acesso negado.';return} usuario=r.usuario; salvarLoginUnico(usuario,email); abrirPortal();}catch(e){msg.className='erro';msg.innerText='Erro ao conectar com a API: '+e.message;}}
+async function abrirPortal(){login.style.display='none';app.style.display='block';usuarioInfo.innerText=`${usuario.nome||''} | ${obterEmailUsuario()} | ${usuario.perfil||''}`; await carregarSistemas();}
+async function carregarSistemas(){try{const r=await api({acao:'listarSistemas'}); sistemas=(r.sistemas||[]).filter(s=>String(s.Ativo||'').toUpperCase().trim()==='SIM'&&!String(s.Sistema||'').toLowerCase().includes('proposta')); renderSistemas();}catch(e){msgSistemas.textContent='Não foi possível carregar sistemas: '+e.message;}}
+function iconeSistema(nome){nome=String(nome).toLowerCase(); if(nome.includes('meta'))return '📈'; if(nome.includes('pcmso'))return '🩺'; if(nome.includes('gest'))return '🏢'; return '🧩';}
+function renderSistemas(){const termo=(busca.value||'').toLowerCase(); cards.innerHTML=''; sistemas.filter(s=>Object.values(s).join(' ').toLowerCase().includes(termo)).forEach(s=>{cards.innerHTML+=`<div class="card"><div class="icon">${iconeSistema(s.Sistema)}</div><h3>${esc(s.Sistema||'')}</h3><p>${esc(s['Descrição']||s.Descricao||'')}</p><span class="status">Online</span><br><br><div class="btns"><button class="btn" onclick='abrirSistema(${JSON.stringify(s)})'>Abrir no Portal</button><a class="btn sec" href="${montarUrlLoginUnico(s.URL)}" target="_blank">Nova aba</a></div></div>`}); msgSistemas.textContent=sistemas.length?'':'Nenhum sistema ativo encontrado. Cadastre os sistemas na aba Sistemas da planilha PORTAL SOMESSO.';}
+function abrirPorNome(nome,btn){const s=sistemas.find(x=>String(x.Sistema).trim()===nome); if(s) abrirSistema(s); else alert('Sistema não encontrado na aba Sistemas: '+nome); marcarMenu(btn);}
+function abrirSistema(s){const urlLoginUnico=montarUrlLoginUnico(s.URL); ocultarTelas(); viewer.style.display='block'; tituloPagina.innerText=s.Sistema||'Sistema'; viewerTitulo.innerText=s.Sistema||'Sistema'; frameSistema.src=urlLoginUnico; abrirNovaAba.href=urlLoginUnico;}
+function ocultarTelas(){dashboard.style.display='none'; empresas.style.display='none'; viewer.style.display='none'; frameSistema.src='';}
+function mostrarDashboard(btn){ocultarTelas(); dashboard.style.display='block'; tituloPagina.innerText='Dashboard'; marcarMenu(btn); renderSistemas();}
+async function mostrarEmpresas(btn){ocultarTelas(); empresas.style.display='block'; tituloPagina.innerText='Cadastro de Empresas'; marcarMenu(btn); await carregarEmpresasPortal();}
+function marcarMenu(btn){document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('ativo')); if(btn)btn.classList.add('ativo');}
+async function carregarEmpresasPortal(){msgEmpresas.textContent='Carregando empresas...'; try{const r=await api({acao:'listarEmpresas'}); empresas=(r.empresas||[]).map(e=>({cnpj:limparCNPJ(e.CNPJ||e.cnpj),empresa:e.Empresa||e.empresa||'',contato:e.Contato||e.contato||'',telefone:e.Telefone||e.telefone||'',email:e.Email||e['E-mail']||e.email||''})); renderEmpresas(); msgEmpresas.textContent='';}catch(e){msgEmpresas.className='erro';msgEmpresas.textContent='Erro ao carregar empresas: '+e.message;}}
+function renderEmpresas(){const termo=(buscaEmpresa.value||'').toLowerCase(); tbEmpresas.innerHTML=''; empresas.filter(e=>Object.values(e).join(' ').toLowerCase().includes(termo)).forEach(e=>{tbEmpresas.innerHTML+=`<tr><td>${maskCNPJ(e.cnpj)}</td><td>${esc(e.empresa)}</td><td>${esc(e.contato)}</td><td>${esc(e.telefone)}</td><td>${esc(e.email)}</td><td class="actions"><button onclick="editarEmpresaPortal('${e.cnpj}')">Editar</button><button class="btn danger" onclick="excluirEmpresaPortal('${e.cnpj}')">Excluir</button></td></tr>`});}
+function editarEmpresaPortal(cnpj){const e=empresas.find(x=>limparCNPJ(x.cnpj)===limparCNPJ(cnpj)); if(!e)return; editandoCnpj=e.cnpj; empCnpj.value=maskCNPJ(e.cnpj); empEmpresa.value=e.empresa; empContato.value=e.contato; empTelefone.value=e.telefone; empEmail.value=e.email; window.scrollTo({top:0,behavior:'smooth'});}
+function limparEmpresaForm(){editandoCnpj=''; ['empCnpj','empEmpresa','empContato','empTelefone','empEmail'].forEach(id=>document.getElementById(id).value=''); msgEmpresas.textContent='';}
+async function salvarEmpresaPortal(){const obj={acao:'salvarEmpresa',cnpj:limparCNPJ(empCnpj.value),empresa:empEmpresa.value.trim(),contato:empContato.value.trim(),telefone:empTelefone.value.trim(),email:empEmail.value.trim()}; if(obj.cnpj.length!==14){alert('CNPJ inválido.');return} for(const k of ['empresa','contato','telefone','email']){if(!obj[k]){alert('Preencha todos os campos.');return}} btnSalvarEmpresa.disabled=true;msgEmpresas.textContent='Salvando...'; try{const r=await api(obj); if(!r.ok){alert(r.erro||'Erro ao salvar empresa.');return} limparEmpresaForm(); await carregarEmpresasPortal(); alert('Empresa salva com sucesso.');}catch(e){alert('Erro ao salvar empresa: '+e.message)}finally{btnSalvarEmpresa.disabled=false}}
+async function excluirEmpresaPortal(cnpj){if(!confirm('Deseja excluir esta empresa?'))return; try{const r=await api({acao:'excluirEmpresa',cnpj}); if(!r.ok){alert(r.erro||'Erro ao excluir empresa.');return} await carregarEmpresasPortal();}catch(e){alert('Erro ao excluir: '+e.message)}}
+function sair(){[...LOGIN_UNICO_KEYS,...LOGIN_UNICO_EMAIL_KEYS,'usuario_propostas','usuario_propostas_email'].forEach(k=>localStorage.removeItem(k));location.reload();}
+document.addEventListener('input',e=>{if(e.target&&e.target.id==='empCnpj')e.target.value=maskCNPJ(e.target.value)});
+window.onload=()=>{const salvo=localStorage.getItem('portal_usuario'); if(salvo){try{usuario=JSON.parse(salvo);salvarLoginUnico(usuario,obterEmailUsuario());abrirPortal();}catch(e){localStorage.removeItem('portal_usuario')}}};
 </script>
-
 </body>
 </html>
