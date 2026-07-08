@@ -106,7 +106,6 @@ iframe{width:100%;height:78vh;border:1px solid #ddd;border-radius:12px;backgroun
       <button class="sair" onclick="sair()">Sair</button>
     </div>
 
-```
 <section id="dashboard">
   <input id="busca" class="busca" placeholder="Pesquisar sistema..." oninput="renderSistemas()">
   <div id="cards" class="cards"></div>
@@ -125,7 +124,6 @@ iframe{width:100%;height:78vh;border:1px solid #ddd;border-radius:12px;backgroun
   </div>
   <iframe id="frameSistema"></iframe>
 </section>
-```
 
   </main>
 </div>
@@ -135,6 +133,55 @@ const API_URL = "https://script.google.com/macros/s/AKfycbyMSNie2VlxV25H-3MpvENo
 
 let usuario = null;
 let sistemas = [];
+
+const LOGIN_UNICO_KEYS = [
+  "portal_usuario",
+  "somesso_usuario",
+  "usuario_pcmso",
+  "usuario_gestao",
+  "usuario_relatorio",
+  "relatorio_usuario",
+  "usuario_metas",
+  "metas_usuario"
+];
+
+const LOGIN_UNICO_EMAIL_KEYS = [
+  "portal_usuario_email",
+  "somesso_usuario_email",
+  "usuario_pcmso_email",
+  "usuario_gestao_email",
+  "usuario_relatorio_email",
+  "relatorio_usuario_email",
+  "usuario_metas_email",
+  "metas_usuario_email"
+];
+
+function obterEmailUsuario(){
+  return String(usuario?.email || usuario?.Email || usuario?.EMAIL || document.getElementById("email")?.value || "").trim().toLowerCase();
+}
+
+function salvarLoginUnico(usuarioAtual, emailAtual){
+  const emailFinal = String(emailAtual || usuarioAtual?.email || usuarioAtual?.Email || usuarioAtual?.EMAIL || "").trim().toLowerCase();
+  LOGIN_UNICO_KEYS.forEach(k => localStorage.setItem(k, JSON.stringify(usuarioAtual)));
+  LOGIN_UNICO_EMAIL_KEYS.forEach(k => localStorage.setItem(k, emailFinal));
+}
+
+function montarUrlLoginUnico(url){
+  const emailFinal = obterEmailUsuario();
+  if(!url || !emailFinal) return url;
+
+  try{
+    const u = new URL(url, window.location.href);
+    u.searchParams.set("email", emailFinal);
+    u.searchParams.set("usuario", emailFinal);
+    u.searchParams.set("portal_login", "1");
+    u.searchParams.set("sso", "1");
+    return u.toString();
+  }catch(e){
+    const separador = String(url).includes("?") ? "&" : "?";
+    return `${url}${separador}email=${encodeURIComponent(emailFinal)}&usuario=${encodeURIComponent(emailFinal)}&portal_login=1&sso=1`;
+  }
+}
 
 async function api(dados){
   const resp = await fetch(API_URL,{
@@ -166,7 +213,7 @@ async function entrar(){
     }
 
     usuario = r.usuario;
-    aplicarLoginUnico(usuario, email);
+    salvarLoginUnico(usuario, email);
     abrirPortal();
 
   }catch(e){
@@ -189,7 +236,7 @@ async function carregarSistemas(){
   const r = await api({acao:"listarSistemas"});
   sistemas = (r.sistemas || []).filter(s => {
     const ativo = String(s.Ativo || "").toUpperCase().trim() === "SIM";
-    const nome = String(s.Sistema || "").toLowerCase().trim();
+    const nome = String(s.Sistema || "").toLowerCase();
     return ativo && !nome.includes("proposta");
   });
   renderSistemas();
@@ -219,7 +266,7 @@ function renderSistemas(){
           <br><br>
           <div class="btns">
             <button class="btn" onclick='abrirSistema(${JSON.stringify(s)})'>Abrir no Portal</button>
-            <a class="btn sec" href="${s.URL}" target="_blank">Nova aba</a>
+            <a class="btn sec" href="${montarUrlLoginUnico(s.URL)}" target="_blank">Nova aba</a>
           </div>
         </div>
       `;
@@ -234,11 +281,10 @@ function abrirPorNome(nome,btn){
 
 function abrirSistema(s){
   const nome = String(s.Sistema || '').toLowerCase();
-
-  const urlComLogin = prepararUrlComLogin(s.URL);
+  const urlLoginUnico = montarUrlLoginUnico(s.URL);
 
   if(nome.includes('metas')){
-    window.open(urlComLogin, '_blank');
+    window.open(urlLoginUnico, '_blank');
     return;
   }
 
@@ -246,8 +292,8 @@ function abrirSistema(s){
   viewer.style.display="block";
   tituloPagina.innerText = s.Sistema || "Sistema";
   viewerTitulo.innerText = s.Sistema || "Sistema";
-  frameSistema.src = urlComLogin;
-  abrirNovaAba.href = urlComLogin;
+  frameSistema.src = urlLoginUnico;
+  abrirNovaAba.href = urlLoginUnico;
 }
 
 function mostrarDashboard(btn){
@@ -263,76 +309,8 @@ function marcarMenu(btn){
   if(btn) btn.classList.add("ativo");
 }
 
-
-function aplicarLoginUnico(dadosUsuario, emailLogin){
-  const email = String(
-    emailLogin ||
-    dadosUsuario?.email ||
-    dadosUsuario?.Email ||
-    dadosUsuario?.["E-mail"] ||
-    ""
-  ).trim().toLowerCase();
-
-  const usuarioNormalizado = {
-    ...dadosUsuario,
-    email: email || dadosUsuario?.email || ""
-  };
-
-  const usuarioJson = JSON.stringify(usuarioNormalizado);
-
-  [
-    "portal_usuario",
-    "somesso_usuario",
-    "usuario_pcmso",
-    "usuario_gestao",
-    "usuario_relatorio",
-    "usuario_metas"
-  ].forEach(chave => localStorage.setItem(chave, usuarioJson));
-
-  [
-    "portal_usuario_email",
-    "somesso_usuario_email",
-    "usuario_pcmso_email",
-    "usuario_gestao_email",
-    "usuario_relatorio_email",
-    "usuario_metas_email"
-  ].forEach(chave => localStorage.setItem(chave, email));
-}
-
-function prepararUrlComLogin(url){
-  const email = usuario?.email || localStorage.getItem("portal_usuario_email") || "";
-  if(!url || !email) return url || "";
-
-  try{
-    const u = new URL(url, window.location.href);
-    u.searchParams.set("portal_email", email);
-    u.searchParams.set("email", email);
-    u.searchParams.set("login_unico", "1");
-    return u.toString();
-  }catch(e){
-    const sep = String(url).includes("?") ? "&" : "?";
-    return `${url}${sep}portal_email=${encodeURIComponent(email)}&email=${encodeURIComponent(email)}&login_unico=1`;
-  }
-}
-
 function sair(){
-  [
-    "portal_usuario",
-    "portal_usuario_email",
-    "somesso_usuario",
-    "somesso_usuario_email",
-    "usuario_pcmso",
-    "usuario_pcmso_email",
-    "usuario_gestao",
-    "usuario_gestao_email",
-    "usuario_relatorio",
-    "usuario_relatorio_email",
-    "usuario_metas",
-    "usuario_metas_email",
-    "usuario_propostas",
-    "usuario_propostas_email"
-  ].forEach(chave => localStorage.removeItem(chave));
-
+  [...LOGIN_UNICO_KEYS, ...LOGIN_UNICO_EMAIL_KEYS, "usuario_propostas", "usuario_propostas_email"].forEach(k => localStorage.removeItem(k));
   location.reload();
 }
 
@@ -340,8 +318,7 @@ window.onload = () => {
   const salvo = localStorage.getItem("portal_usuario");
   if(salvo){
     usuario = JSON.parse(salvo);
-    const emailSalvo = usuario?.email || localStorage.getItem("portal_usuario_email") || "";
-    aplicarLoginUnico(usuario, emailSalvo);
+    salvarLoginUnico(usuario, obterEmailUsuario());
     abrirPortal();
   }
 };
