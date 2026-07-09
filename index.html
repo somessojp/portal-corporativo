@@ -63,7 +63,7 @@ function abrirPorNome(nome,btn){
   }
   marcarMenu(btn);
 }
-function abrirSistema(s){const urlLoginUnico=montarUrlLoginUnico(s.URL); ocultarTelas(); viewer.style.display='block'; tituloPagina.innerText=s.Sistema||'Sistema'; viewerTitulo.innerText=s.Sistema||'Sistema'; frameSistema.src=urlLoginUnico; abrirNovaAba.href=urlLoginUnico;}
+function abrirSistema(s){const urlLoginUnico=montarUrlLoginUnico(s.URL); const nomeSistema=normalizarNomeSistema(s.Sistema||''); if(nomeSistema.includes('metas')||nomeSistema.includes('comissao')){window.open(urlLoginUnico,'_blank'); return;} ocultarTelas(); viewer.style.display='block'; tituloPagina.innerText=s.Sistema||'Sistema'; viewerTitulo.innerText=s.Sistema||'Sistema'; frameSistema.src=urlLoginUnico; abrirNovaAba.href=urlLoginUnico;}
 function ocultarTelas(){
   const telaDashboard = document.getElementById('dashboard');
   const telaEmpresas = document.getElementById('empresas');
