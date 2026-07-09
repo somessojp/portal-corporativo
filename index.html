@@ -35,8 +35,8 @@ let editandoCnpj = "";
 const LOGIN_UNICO_KEYS = ["portal_usuario","somesso_usuario","usuario_pcmso","usuario_gestao","usuario_relatorio","relatorio_usuario","usuario_metas","metas_usuario"];
 const LOGIN_UNICO_EMAIL_KEYS = ["portal_usuario_email","somesso_usuario_email","usuario_pcmso_email","usuario_gestao_email","usuario_relatorio_email","relatorio_usuario_email","usuario_metas_email","metas_usuario_email"];
 function esc(v){return String(v??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
-function limparCNPJ(v){return String(v||'').replace(/\D/g,'')}
-function maskCNPJ(v){return limparCNPJ(v).replace(/(\d{2})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1/$2').replace(/(\d{4})(\d)/,'$1-$2').slice(0,18)}
+function limparCNPJ(v){return String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'')}
+function maskCNPJ(v){const s=limparCNPJ(v).slice(0,14); if(/^[0-9]+$/.test(s)){return s.replace(/(\d{2})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1/$2').replace(/(\d{4})(\d)/,'$1-$2').slice(0,18)} return s}
 function obterEmailUsuario(){return String(usuario?.email||usuario?.Email||usuario?.EMAIL||document.getElementById('email')?.value||'').trim().toLowerCase()}
 function salvarLoginUnico(usuarioAtual,emailAtual){const emailFinal=String(emailAtual||usuarioAtual?.email||usuarioAtual?.Email||usuarioAtual?.EMAIL||'').trim().toLowerCase();LOGIN_UNICO_KEYS.forEach(k=>localStorage.setItem(k,JSON.stringify(usuarioAtual)));LOGIN_UNICO_EMAIL_KEYS.forEach(k=>localStorage.setItem(k,emailFinal));}
 function montarUrlLoginUnico(url){const emailFinal=obterEmailUsuario(); if(!url||!emailFinal)return url; try{const u=new URL(url,window.location.href);u.searchParams.set('email',emailFinal);u.searchParams.set('usuario',emailFinal);u.searchParams.set('portal_login','1');u.searchParams.set('sso','1');return u.toString();}catch(e){const sep=String(url).includes('?')?'&':'?';return `${url}${sep}email=${encodeURIComponent(emailFinal)}&usuario=${encodeURIComponent(emailFinal)}&portal_login=1&sso=1`;}}
@@ -45,7 +45,7 @@ async function entrar(){const email=document.getElementById('email').value.trim(
 async function abrirPortal(){login.style.display='none';app.style.display='block';usuarioInfo.innerText=`${usuario.nome||''} | ${obterEmailUsuario()} | ${usuario.perfil||''}`; await carregarSistemas();}
 async function carregarSistemas(){try{const r=await api({acao:'listarSistemas'}); sistemas=(r.sistemas||[]).filter(s=>String(s.Ativo||'').toUpperCase().trim()==='SIM'&&!String(s.Sistema||'').toLowerCase().includes('proposta')); renderSistemas();}catch(e){msgSistemas.textContent='Não foi possível carregar sistemas: '+e.message;}}
 function iconeSistema(nome){nome=String(nome).toLowerCase(); if(nome.includes('meta'))return '📈'; if(nome.includes('pcmso'))return '🩺'; if(nome.includes('gest'))return '🏢'; return '🧩';}
-function renderSistemas(){const termo=(busca.value||'').toLowerCase(); cards.innerHTML=''; sistemas.filter(s=>Object.values(s).join(' ').toLowerCase().includes(termo)).forEach(s=>{cards.innerHTML+=`<div class="card"><div class="icon">${iconeSistema(s.Sistema)}</div><h3>${esc(s.Sistema||'')}</h3><p>${esc(s['Descrição']||s.Descricao||'')}</p><span class="status">Online</span><br><br><div class="btns"><button class="btn" onclick='abrirSistema(${JSON.stringify(s)})'>Abrir no Portal</button><a class="btn sec" href="${montarUrlLoginUnico(s.URL)}" target="_blank">Nova aba</a></div></div>`}); msgSistemas.textContent=sistemas.length?'':'Nenhum sistema ativo encontrado. Cadastre os sistemas na aba Sistemas da planilha PORTAL SOMESSO.';}
+function renderSistemas(){const termo=(busca.value||'').toLowerCase(); cards.innerHTML=''; sistemas.filter(s=>Object.values(s).join(' ').toLowerCase().includes(termo)).forEach(s=>{const nomeNorm=normalizarNomeSistema(s.Sistema||''); const ehMetas=nomeNorm.includes('metas')||nomeNorm.includes('comissao'); const textoBotao=ehMetas?'Abrir em nova aba':'Abrir no Portal'; cards.innerHTML+=`<div class="card"><div class="icon">${iconeSistema(s.Sistema)}</div><h3>${esc(s.Sistema||'')}</h3><p>${esc(s['Descrição']||s.Descricao||'')}</p><span class="status">Online</span><br><br><div class="btns"><button class="btn" onclick='abrirSistema(${JSON.stringify(s)})'>${textoBotao}</button><a class="btn sec" href="${montarUrlLoginUnico(s.URL)}" target="_blank">Nova aba</a></div></div>`}); msgSistemas.textContent=sistemas.length?'':'Nenhum sistema ativo encontrado. Cadastre os sistemas na aba Sistemas da planilha PORTAL SOMESSO.';}
 function normalizarNomeSistema(v){
   return String(v || '')
     .normalize('NFD')
@@ -57,13 +57,27 @@ function abrirPorNome(nome,btn){
   const alvo = normalizarNomeSistema(nome);
   const s = sistemas.find(x => normalizarNomeSistema(x.Sistema) === alvo);
   if(s){
-    abrirSistema(s);
+    const abriuNoPortal = abrirSistema(s);
+    if(abriuNoPortal && btn) marcarMenu(btn);
   }else{
     alert('Sistema não encontrado na aba Sistemas: ' + nome + '\n\nConfira se existe uma linha ativa com esse mesmo nome na aba Sistemas.');
   }
-  marcarMenu(btn);
 }
-function abrirSistema(s){const urlLoginUnico=montarUrlLoginUnico(s.URL); const nomeSistema=normalizarNomeSistema(s.Sistema||''); if(nomeSistema.includes('metas')||nomeSistema.includes('comissao')){window.open(urlLoginUnico,'_blank'); return;} ocultarTelas(); viewer.style.display='block'; tituloPagina.innerText=s.Sistema||'Sistema'; viewerTitulo.innerText=s.Sistema||'Sistema'; frameSistema.src=urlLoginUnico; abrirNovaAba.href=urlLoginUnico;}
+function abrirSistema(s){
+  const urlLoginUnico=montarUrlLoginUnico(s.URL);
+  const nomeSistema=normalizarNomeSistema(s.Sistema||'');
+  if(nomeSistema.includes('metas')||nomeSistema.includes('comissao')){
+    window.open(urlLoginUnico,'_blank');
+    return false;
+  }
+  ocultarTelas();
+  viewer.style.display='block';
+  tituloPagina.innerText=s.Sistema||'Sistema';
+  viewerTitulo.innerText=s.Sistema||'Sistema';
+  frameSistema.src=urlLoginUnico;
+  abrirNovaAba.href=urlLoginUnico;
+  return true;
+}
 function ocultarTelas(){
   const telaDashboard = document.getElementById('dashboard');
   const telaEmpresas = document.getElementById('empresas');
